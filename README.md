@@ -2,6 +2,6 @@
 Proyecto Final ~ Progra I 2022-1
 
 ## Team
-- [@AlbFR](github.com/AlbFR)
-- [@Sebasinmas](github.com/Sebasinmas)
-- [@Cxrloskenobi](github.com/Cxrloskenobi)
+- [@AlbFR](https://github.com/AlbFR)
+- [@Sebasinmas](https://github.com/Sebasinmas)
+- [@Cxrloskenobi](https://github.com/Cxrloskenobi)
