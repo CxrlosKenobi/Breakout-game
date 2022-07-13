@@ -1,5 +1,12 @@
 # Breakout-game
-Proyecto Final ~ Progra I 2022-1
+> Proyecto Final ~ Programación I
+
+## Para ejecutar el juego
+
+```bash
+$ bash run.sh
+```
+
 
 ## Team
 - [@AlbFR](https://github.com/AlbFR)
