@@ -23,6 +23,7 @@
 *.lo
 
 # Shared objects (inc. Windows DLLs)
+*.vscode
 *.dll
 *.so
 *.so.*
