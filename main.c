@@ -1,23 +1,12 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
-#include <math.h>
 #include <stdbool.h>
-#include "modules/BaseController.h"
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 SDL_Window *gWindow = NULL;
-SDL_Surface *gScreenSurface = NULL;
 SDL_Surface *gHelloWorld = NULL;
-
-enum KeyPressSurfaces {
-	KEY_PRESS_SURFACE_DEFAULT,
-	KEY_PRESS_SURFACE_UP,
-	KEY_PRESS_SURFACE_DOWN,
-	KEY_PRESS_SURFACE_LEFT,
-	KEY_PRESS_SURFACE_RIGHT,
-	KEY_PRESS_SURFACE_TOTAL
-};
+SDL_Surface *gScreenSurface = NULL;
 
 SDL_Surface* loadSurface (char* path) {
 	SDL_Surface *loadedSurface = SDL_LoadBMP(path);
@@ -45,11 +34,11 @@ bool init () { // Start up environment
 
 bool loadMedia () {
 	bool success = true;
-	gHelloWorld = SDL_LoadBMP("assets/bird.bmp");
-	if (gHelloWorld == NULL) {
-		printf("Unable to load owl image :/\nSDL_Error: %s\n", SDL_GetError());
-		success = false;
-	}
+	/* gHelloWorld = SDL_LoadBMP("assets/bird.bmp"); */
+	/* if (gHelloWorld == NULL) { */
+	/* 	printf("Unable to load owl image :/\nSDL_Error: %s\n", SDL_GetError()); */
+	/* 	success = false; */
+	/* } */
 	return success;
 }
 
@@ -78,10 +67,22 @@ int main (int argc, char* argv[]) {
 				while (SDL_PollEvent(&e) != 0) {
 					if (e.type == SDL_QUIT)
 						quit = true;
+					else if (e.type == SDL_KEYDOWN) {
+						switch (e.key.keysym.sym) {
+							case SDLK_w:
+								printf("up :D\n");
+								break;
+							case SDLK_a:
+								printf("left :D\n");
+								break;
+							case SDLK_d:
+								printf("right :D\n");
+								break;
+						}
+					}
+					SDL_BlitSurface(gHelloWorld, NULL, gScreenSurface, NULL);
+					SDL_UpdateWindowSurface(gWindow);
 				}
-				SDL_Delay(100);
-				/* SDL_BlitSurface(gXOut, NUll, gScreenSurface, NULL); */
-				/* SDL_UpdateWindowSurface(gWindow); */
 			}
 		}
 	}
