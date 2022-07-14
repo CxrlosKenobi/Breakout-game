@@ -30,6 +30,7 @@
 *.dylib
 
 # Executables
+Breakout
 *.exe
 *.out
 *.app
