@@ -1,5 +1,7 @@
 #include <stdlib.h>
+#include <stdbool.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 bool initialize (
     char* wTitle, int WINDOW_WIDTH, int WINDOW_HEIGHT,
@@ -22,6 +24,7 @@ bool initialize (
 
 	Uint32 renderFlags = SDL_RENDERER_ACCELERATED; // This is the flag for hardware acceleration.
 	gRenderer = SDL_CreateRenderer(gWindow, -1, renderFlags); // Create a renderer for the window.
+	
 	if (!gRenderer) {
 		printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
 		SDL_DestroyWindow(gWindow);
