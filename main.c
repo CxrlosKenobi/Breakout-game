@@ -22,7 +22,7 @@ int main (void) {
     );
 
     Uint32 renderFlags = SDL_RENDERER_ACCELERATED;
-    SDL_Renderer *gameRenderer = SDL_CreateRenderer(gameWindow, -1, renderFlags);
+    SDL_Renderer *gameRenderer = SDL_CreateRenderer(gameWindow, -1, renderFlags); 
 
     if (!gameRenderer) {
       printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
@@ -30,6 +30,7 @@ int main (void) {
       SDL_Quit();
       return 1;
     }
+    SDL_Surface *backgroundSurface = IMG_Load("assets/sprites/breakoutFondo.png");
 
     SDL_Surface *spriteSurface = IMG_Load("assets/dude.png");
     if (!spriteSurface) {
@@ -41,8 +42,19 @@ int main (void) {
     }
 
     SDL_Texture *spriteTexture = SDL_CreateTextureFromSurface(gameRenderer, spriteSurface);
-    SDL_FreeSurface(spriteSurface);
+    SDL_Texture *backgroundTexture = SDL_CreateTextureFromSurface(gameRenderer, backgroundSurface);
 
+    SDL_FreeSurface(spriteSurface);
+    SDL_FreeSurface(backgroundSurface);
+    SDL_Rect backgroundRectangle = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
+
+    if(!backgroundTexture){
+      printf("Error: %s\n", SDL_GetError());
+      SDL_DestroyRenderer(gameRenderer);
+      SDL_DestroyWindow(gameWindow);
+      SDL_Quit();
+      return 1;
+    }
     if (!spriteTexture) {
       printf("Error: %s\n", SDL_GetError());
       SDL_DestroyRenderer(gameRenderer);
@@ -51,8 +63,8 @@ int main (void) {
       return 1;
     }
 
-    SDL_Rect spriteRectangle;
-    SDL_QueryTexture(
+    SDL_Rect spriteRectangle; 
+    SDL_QueryTexture( 
       spriteTexture,
       NULL, NULL,
       &spriteRectangle.w,
@@ -154,6 +166,7 @@ int main (void) {
         yPosition = WINDOW_HEIGHT - spriteRectangle.h;
       
       SDL_RenderClear(gameRenderer);
+      SDL_RenderCopy(gameRenderer, backgroundTexture, NULL, &backgroundRectangle);
       SDL_RenderCopy(gameRenderer, spriteTexture, NULL, &spriteRectangle);
       SDL_RenderPresent(gameRenderer);
 
