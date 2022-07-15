@@ -21,4 +21,3 @@ fi;
 
 echo -e "\n[ \e[32m+\e[90m ] \e[0mClosed. \e[0m";
 exit 0;
-
