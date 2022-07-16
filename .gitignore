@@ -40,6 +40,7 @@ Breakout
 *.hex
 
 # Debug files
+tmp.*
 *.dSYM/
 *.su
 *.idb
