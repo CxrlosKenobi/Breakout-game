@@ -45,7 +45,7 @@ int main () {
         case SDL_QUIT:
           closeWindow = 1;
           break;
-        
+
         case SDL_KEYDOWN:
           switch (gameEvent.key.keysym.scancode) {
             case SDL_SCANCODE_UP:
@@ -91,13 +91,13 @@ int main () {
               break;
           }
           break;
-        
+
         default:
           break;
       }
     }
 
-    paddle.speed.x = 0; paddle.speed.y = 0; 
+    paddle.speed.x = 0; paddle.speed.y = 0;
     if (up == 1 && down == 0)
       paddle.speed.y = -SPEED;
     if (down == 1 && up == 0)
@@ -122,7 +122,7 @@ int main () {
       paddle.xPos = WINDOW_WIDTH - paddle.rect.w;
     if (paddle.yPos >= (WINDOW_HEIGHT - paddle.rect.h))
       paddle.yPos = WINDOW_HEIGHT - paddle.rect.h;
-    
+
     SDL_RenderClear(gRenderer);
     SDL_RenderCopy(gRenderer, paddle.texture, NULL, &paddle.rect);
     SDL_RenderPresent(gRenderer);
@@ -133,7 +133,7 @@ int main () {
 	SDL_DestroyRenderer(gRenderer);
 	SDL_DestroyWindow(gWindow);
 	SDL_Quit();
-	
+
 	return 0;
 }
 

@@ -23,7 +23,7 @@ typedef struct {
 } Paddle; // Manage from dynamic memory for better performance
 
 
-// Ball 
+// Ball
 typedef struct {
 	SDL_Rect rect;
 	Speed vel;
