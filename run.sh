@@ -1,7 +1,6 @@
 ###
 # Run.sh -- Our cool shortcut to run SDL2 packages at once.
 ###
-# runner="gcc main.c -o Breakout -lSDL2 -lSDL2_image";
 runner="gcc main.c -o Breakout -lSDL2 -lSDL2_image";
  
 clear;
