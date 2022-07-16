@@ -1,10 +1,13 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include "modules/structs.h"
+#include "modules/CollidingBall.h"
 
-#define WINDOW_WIDTH (640)
-#define WINDOW_HEIGHT (480)
-#define SPEED (300)
+const unsigned short WINDOW_WIDTH = 640;
+const unsigned short WINDOW_HEIGHT = 480;
+const unsigned short SPEED = 300;
 
 
 int main (void) {
@@ -41,8 +44,11 @@ int main (void) {
     return 1;
   }
 
+  SDL_Surface *ballSurface = IMG_Load("assets/sprites/breakoutSprites.png");
+
   SDL_Texture *bgTexture = SDL_CreateTextureFromSurface(gameRenderer, bgSurface);
   SDL_Texture *baseTexture = SDL_CreateTextureFromSurface(gameRenderer, baseSurface);
+  SDL_Texture *ballTexture = SDL_CreateTextureFromSurface(gameRenderer, ballSurface);
 
   SDL_FreeSurface(baseSurface);
   SDL_FreeSurface(bgSurface);
@@ -70,6 +76,9 @@ int main (void) {
     &spriteRectangle.w,
     &spriteRectangle.h
   );
+
+  Ball *b = malloc(sizeof(Ball));
+  initBall(b);
 
   spriteRectangle.w /= 4;
   spriteRectangle.h /= 4;
@@ -155,6 +164,7 @@ int main (void) {
     spriteRectangle.x = (int)xPosition;
     spriteRectangle.y = (int)yPosition;
 
+
     // Keep player sprite in the bounds of the window
     if (xPosition <= 0)
       xPosition = 0;
@@ -164,10 +174,12 @@ int main (void) {
       xPosition = WINDOW_WIDTH - spriteRectangle.w;
     if (yPosition >= (WINDOW_HEIGHT - spriteRectangle.h))
       yPosition = WINDOW_HEIGHT - spriteRectangle.h;
+    updateBalls(b, 1, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
     
     SDL_RenderClear(gameRenderer);
     SDL_RenderCopy(gameRenderer, bgTexture, NULL, &backgroundRectangle);
     SDL_RenderCopy(gameRenderer, baseTexture, NULL, &spriteRectangle);
+    renderBall(*b, gameRenderer, ballTexture);
     SDL_RenderPresent(gameRenderer);
 
     SDL_Delay(1000 / 60);

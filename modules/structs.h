@@ -1,8 +1,8 @@
 #include <SDL2/SDL.h>
 
 typedef struct {
-	float x;
-	float y;
+	int x;
+	int y;
 } Velocity;
 
 typedef struct {
