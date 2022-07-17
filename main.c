@@ -49,7 +49,7 @@ int main() {
   Ball *b = malloc(sizeof(Ball));
   unsigned short ballsAmount = 1;
   initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
-  SDL_Surface *ballSurface = IMG_Load("assets/sprites/bola.png");
+  SDL_Surface *ballSurface = IMG_Load("assets/sprites/ball.png");
   SDL_Texture *ballTexture = SDL_CreateTextureFromSurface(gRenderer, ballSurface);
 
   // Paddle setup
