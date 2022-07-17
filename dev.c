@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "modules/structs.h"
@@ -78,7 +79,7 @@ int main (void) {
   );
 
   Ball *b = malloc(sizeof(Ball));
-  initBall(b);
+  initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
 
   spriteRectangle.w /= 4;
   spriteRectangle.h /= 4;
@@ -88,7 +89,7 @@ int main (void) {
   float xSpeed = 0, ySpeed = 0;
 
   int up = 0, down = 0, left = 0, right = 0;
-  int closeWindow = 0;
+  bool closeWindow = 0;
   while (closeWindow == 0) {
     SDL_Event gameEvent;
     while (SDL_PollEvent(&gameEvent)) {

@@ -3,6 +3,11 @@
 typedef struct {
 	int x;
 	int y;
+} Position;
+
+typedef struct {
+	int x;
+	int y;
 } Velocity;
 
 typedef struct {
@@ -11,7 +16,7 @@ typedef struct {
 } Brick;
 
 typedef struct {
-	SDL_Rect rect;
+	Position pos;
 	Velocity vel;
 	unsigned short radius;
 } Ball;
