@@ -1,7 +1,10 @@
-/* ---- */
-
 
 // Global
+typedef struct {
+	int x;
+	int y;
+} Position;
+
 typedef struct {
 	float x;
 	float y;
@@ -22,15 +25,6 @@ typedef struct {
 	short power;
 } Paddle; // Manage from dynamic memory for better performance
 
-
-// Ball
-typedef struct {
-	SDL_Rect rect;
-	Speed vel;
-	unsigned short radius;
-} Ball;
-
-
 // Background
 typedef struct {
 	SDL_Rect rect;
@@ -44,3 +38,9 @@ typedef struct {
 	unsigned short health;
 	short power;
 } Brick;
+
+typedef struct {
+	Position pos;
+	Speed vel;
+	unsigned short radius;
+} Ball;

@@ -1,13 +1,13 @@
 //* Paddle *//
 
-bool InitPaddle(
+bool initPaddle(
   Paddle *paddle,
   SDL_Renderer **gRenderer,
   SDL_Surface **surface,
   SDL_Texture **texture
 ) {
 
-  paddle -> sprite_path = "assets/dude.png";
+  paddle -> sprite_path = "assets/sprites/paddle.png";
   *surface = IMG_Load(paddle -> sprite_path);
 	if (!*surface) {
     printf("Error[-1]: %s\n", IMG_GetError());
@@ -31,8 +31,8 @@ bool InitPaddle(
     &paddle -> rect.h
   );
 
-  paddle -> rect.w /= 3; // Downscaling
-  paddle -> rect.h /= 3; // Downscaling
+  // paddle -> rect.w /= 3; // Downscaling
+  // paddle -> rect.h /= 3; // Downscaling
 
   return true;
 }

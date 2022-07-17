@@ -1,15 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 //
+#include "modules/structs.h"
 #include "utils/utils.h"
+#include "modules/CollidingBall"
 
-
-/* Global variables */
-#define WINDOW_WIDTH  (640)
-#define WINDOW_HEIGHT (480)
-#define SPEED (300)
+const unsigned short WINDOW_WIDTH = 640;
+const unsigned short WINDOW_HEIGHT = 480;
+const unsigned short SPEED = 300;
 
 int main (void) {
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
@@ -84,7 +85,7 @@ int main (void) {
 	float xSpeed = 0, ySpeed = 0;
 
 	int up = 0, down = 0, left = 0, right = 0;
-	int closeWindow = 0;
+	bool closeWindow = 0;
 	while (closeWindow == 0) {
 		SDL_Event gameEvent;
 		while (SDL_PollEvent(&gameEvent)) {

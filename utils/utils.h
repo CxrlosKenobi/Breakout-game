@@ -3,7 +3,7 @@
 #include <SDL2/SDL_image.h>
 
 
-bool LoadSurfaceTextureIMG(
+bool LoadSurfaceTextureIMG (
 	const char *filePath,
 	SDL_Surface **objSurface, 
 	SDL_Texture **objTexture,
@@ -21,6 +21,7 @@ bool LoadSurfaceTextureIMG(
 		printf("Error[-1]: %s\n", SDL_GetError());
 		return false;
 	}
+	return true;
 }
 
 
