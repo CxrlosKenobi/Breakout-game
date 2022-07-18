@@ -25,7 +25,7 @@ void managePaddleCollision (Ball *b, Paddle p) {
     b->vel.y = abs(b->vel.y) * -1;
 }
 
-void updateBalls (Ball *b, unsigned short n, bool *gameOver, unsigned short gameWidth, unsigned short gameHeight Paddle paddle) {
+void updateBalls (Ball *b, unsigned short n, bool *gameOver, unsigned short gameWidth, unsigned short gameHeight, Paddle paddle) {
   for (unsigned short i=0;i<n;++i) {
     manageWallCollision(b+i, gameOver, gameWidth, gameHeight);
     managePaddleCollision(b+i, paddle);
