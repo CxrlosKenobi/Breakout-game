@@ -4,6 +4,7 @@
 #include <SDL2/SDL_image.h>
 #include <stdbool.h>
 #include <math.h>
+#include <time.h>
 //
 #include "modules/main.h"
 #include "modules/structs.h"
@@ -16,14 +17,17 @@
 #define FPS (60)
 #define SPEED (300)
 
+
 // Leave'em as this type of const pls, need it for ball calculating collides with walls
 const unsigned short WINDOW_WIDTH = 640;
 const unsigned short WINDOW_HEIGHT = 480;
+
 
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
 
 int main() {
+  srand(time(NULL));
   bool start = Initialize("Breakout!", WINDOW_WIDTH, WINDOW_HEIGHT, &gWindow, &gRenderer);
   if (!start)
     return 1;

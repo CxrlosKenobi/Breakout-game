@@ -3,7 +3,10 @@ Brick** createRandomBrickMatrix (const unsigned short m, const unsigned short n)
 	for (unsigned short i=0;i<m;++i) {
 		bricks[i] = malloc(n * sizeof(Brick));
     for (unsigned short j=0;j<n;++j) {
-      bricks[i][j].health = rand() % 4;
+      if (rand()%3)
+        bricks[i][j].health = 0;
+      else
+        bricks[i][j].health = rand() % 4;
       bricks[i][j].power = 0;
     }
 	}
@@ -24,9 +27,12 @@ void renderBricks (Brick **m, SDL_Renderer *renderer, SDL_Texture **texture, con
   for (unsigned short i=0;i<rows;++i) {
     rect -> x = 0;
     for (unsigned short j=0;j<cols;++j) {
-      if (!m[i][j].health)
-        continue;
+      /* if (!m[i][j].health) */
+      /*   continue; */
       switch (m[i][j].health) {
+        case 0:
+          brickTexture = NULL;
+          break;
         case 1:
           brickTexture = texture[1];
           break;
