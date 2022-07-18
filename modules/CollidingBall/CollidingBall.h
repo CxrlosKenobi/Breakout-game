@@ -15,36 +15,40 @@ void manageWallCollision (Ball *b, bool *gameOver, unsigned short gameWidth, uns
     *gameOver = true;
 }
 
+// void manageBricksCollision (Brick **bricks, Ball *ball, ) {
+
+// }
+
 void managePaddleCollision (Ball *b, Paddle p) {
-  const unsigned short margin = 10;
-  if (b->pos.y >= p.rect.y)
-    printf("Same Height, pay attention\n");
+  const unsigned short margin = 6;
   if ((p.rect.y-p.rect.h <= b->pos.y && b->pos.y <= p.rect.y) && (p.rect.x-margin <= b->pos.x && b->pos.x <= p.rect.x+p.rect.w+margin))
     b->vel.y = abs(b->vel.y) * -1;
 }
 
 void updateBalls (Ball *b, unsigned short n, bool *gameOver, unsigned short gameWidth, unsigned short gameHeight, Paddle paddle) {
-	for (unsigned short i=0;i<n;++i) {
+  for (unsigned short i=0;i<n;++i) {
     manageWallCollision(b+i, gameOver, gameWidth, gameHeight);
     managePaddleCollision(b+i, paddle);
     /* manageBricksCollision(b+i); */
-		b->pos.x += b->vel.x;
-		b->pos.y += b->vel.y;
-	}
+    b->pos.x += b->vel.x;
+    b->pos.y += b->vel.y;
+  }
 }
 
 void initBall (Ball *b, unsigned short gameWidth, unsigned short gameHeight) {
-  srand(time(0));
+  /* srand(time(0)); */
   const short int vel = 7;
-	const short int maxv = 4;
-	const short int minv = -1 * maxv;
+  const short int maxv = 4;
+  const short int minv = -1 * maxv;
   b->radius = 6;
-	b->pos.x = gameWidth / 2;
-	b->pos.y = 4 * gameHeight / 5;
-	b->vel.x = rand()%(maxv-minv) + minv;
-	b->vel.y = (vel*vel) - (b->vel.x)*(b->vel.x);
-	b->vel.y = sqrt(b->vel.y);
-	b->vel.y *= -1;
+  b->pos.x = gameWidth / 2;
+  b->pos.y = 4 * gameHeight / 5;
+  b->vel.x = rand()%(maxv-minv) + minv;
+  if (!b->vel.x)
+    b->vel.x--;
+  b->vel.y = (vel*vel) - (b->vel.x)*(b->vel.x);
+  b->vel.y = sqrt(b->vel.y);
+  b->vel.y *= -1;
 }
 
 
