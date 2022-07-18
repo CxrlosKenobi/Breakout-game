@@ -20,12 +20,13 @@ void manageWallCollision (Ball *b, bool *gameOver, unsigned short gameWidth, uns
 // }
 
 void managePaddleCollision (Ball *b, Paddle p) {
-  const unsigned short margin = 6;
-  if ((p.rect.y-p.rect.h <= b->pos.y && b->pos.y <= p.rect.y) && (p.rect.x-margin <= b->pos.x && b->pos.x <= p.rect.x+p.rect.w+margin))
+  const unsigned short marginx = 6;
+  const unsigned short marginy = 8;
+  if ((p.rect.y-p.rect.h <= b->pos.y - marginy && b->pos.y <= p.rect.y) && (p.rect.x-marginx <= b->pos.x && b->pos.x <= p.rect.x+p.rect.w+marginx))
     b->vel.y = abs(b->vel.y) * -1;
 }
 
-void updateBalls (Ball *b, unsigned short n, bool *gameOver, unsigned short gameWidth, unsigned short gameHeight Paddle paddle) {
+void updateBalls (Ball *b, unsigned short n, bool *gameOver, unsigned short gameWidth, unsigned short gameHeight, Paddle paddle) {
   for (unsigned short i=0;i<n;++i) {
     manageWallCollision(b+i, gameOver, gameWidth, gameHeight);
     managePaddleCollision(b+i, paddle);
@@ -59,6 +60,17 @@ void renderBall (Ball b, SDL_Renderer *renderer, SDL_Texture *texture) {
   rect->x = b.pos.x - b.radius;
   rect->y = b.pos.y - b.radius;
   SDL_RenderCopy(renderer, texture, NULL, rect);
+  free(rect);
+}
+
+void renderBallSquare (Ball b, SDL_Renderer *renderer) {
+  SDL_Rect *rect = malloc(sizeof(SDL_Rect));
+  rect->w = b.radius * 2;
+  rect->h = b.radius * 2;
+  rect->x = b.pos.x - b.radius;
+  rect->y = b.pos.y - b.radius;
+  SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+  SDL_RenderFillRect(renderer, rect);
   free(rect);
 }
 
