@@ -14,7 +14,7 @@
 #include "utils/utils.h"
 
 /* Global Settings */
-#define FPS (15)
+#define FPS (50)
 #define SPEED (300)
 
 
@@ -36,8 +36,8 @@ int main() {
   SDL_Texture *bgTexture = SDL_CreateTextureFromSurface(gRenderer, bgSurface);
 
   // Bricks setup
-  const unsigned short rows = 8;
-  const unsigned short cols = 16;
+  const unsigned short rows = 6;
+  const unsigned short cols = 10;
   Brick **bricks = createRandomBrickMatrix(rows, cols);
   SDL_Surface *brickSurface[4];
   brickSurface[0] =  NULL;
@@ -74,8 +74,8 @@ int main() {
   paddle.speed.y = 0;
   int up = 0, down = 0, left = 0, right = 0;
   bool closeWindow = 0;
-  while (!closeWindow)
-  {
+  bool pause = true;
+  while (!closeWindow) {
     SDL_Event gameEvent;
     while (SDL_PollEvent(&gameEvent))
     {
@@ -86,26 +86,27 @@ int main() {
         break;
 
       case SDL_KEYDOWN:
-        switch (gameEvent.key.keysym.scancode)
-        {
-        case SDL_SCANCODE_UP:
-        case SDL_SCANCODE_W:
-          up = 1;
-          break;
-        case SDL_SCANCODE_DOWN:
-        case SDL_SCANCODE_S:
-          down = 1;
-          break;
-        case SDL_SCANCODE_LEFT:
-        case SDL_SCANCODE_A:
-          left = 1;
-          break;
-        case SDL_SCANCODE_RIGHT:
-        case SDL_SCANCODE_D:
-          right = 1;
-          break;
-        default:
-          break;
+        switch (gameEvent.key.keysym.scancode) {
+          case SDL_SCANCODE_SPACE:
+            pause = !pause;
+          case SDL_SCANCODE_UP:
+          case SDL_SCANCODE_W:
+            up = 1;
+            break;
+          case SDL_SCANCODE_DOWN:
+          case SDL_SCANCODE_S:
+            down = 1;
+            break;
+          case SDL_SCANCODE_LEFT:
+          case SDL_SCANCODE_A:
+            left = 1;
+            break;
+          case SDL_SCANCODE_RIGHT:
+          case SDL_SCANCODE_D:
+            right = 1;
+            break;
+          default:
+            break;
         }
         break;
 
@@ -137,54 +138,59 @@ int main() {
         break;
       }
     }
+    if (!pause) {
+      paddle.speed.x = 0;
+      paddle.speed.y = 0;
+      if (up == 1 && down == 0)
+        paddle.speed.y = -SPEED;
+      if (down == 1 && up == 0)
+        paddle.speed.y = SPEED;
+      if (left == 1 && right == 0)
+        paddle.speed.x = -SPEED;
+      if (right == 1 && left == 0)
+        paddle.speed.x = SPEED;
 
-    paddle.speed.x = 0;
-    paddle.speed.y = 0;
-    if (up == 1 && down == 0)
-      paddle.speed.y = -SPEED;
-    if (down == 1 && up == 0)
-      paddle.speed.y = SPEED;
-    if (left == 1 && right == 0)
-      paddle.speed.x = -SPEED;
-    if (right == 1 && left == 0)
-      paddle.speed.x = SPEED;
+      paddle.xPos += paddle.speed.x / 60;
+      // paddle.yPos += paddle.speed.y / 60;
+      paddle.yPos = 400;
 
-    paddle.xPos += paddle.speed.x / 60;
-    // paddle.yPos += paddle.speed.y / 60;
-    paddle.yPos = 400;
+      paddle.rect.x = (int)paddle.xPos;
+      paddle.rect.y = (int)paddle.yPos;
 
-    paddle.rect.x = (int)paddle.xPos;
-    paddle.rect.y = (int)paddle.yPos;
+      // Keep player sprite in the bounds of the window
+      if (paddle.xPos <= 0)
+        paddle.xPos = 0;
+      if (paddle.yPos <= 0)
+        paddle.yPos = 0;
+      if (paddle.xPos >= (WINDOW_WIDTH - paddle.rect.w))
+        paddle.xPos = WINDOW_WIDTH - paddle.rect.w;
+      if (paddle.yPos >= (WINDOW_HEIGHT - paddle.rect.h))
+        paddle.yPos = WINDOW_HEIGHT - paddle.rect.h;
 
-    // Keep player sprite in the bounds of the window
-    if (paddle.xPos <= 0)
-      paddle.xPos = 0;
-    if (paddle.yPos <= 0)
-      paddle.yPos = 0;
-    if (paddle.xPos >= (WINDOW_WIDTH - paddle.rect.w))
-      paddle.xPos = WINDOW_WIDTH - paddle.rect.w;
-    if (paddle.yPos >= (WINDOW_HEIGHT - paddle.rect.h))
-      paddle.yPos = WINDOW_HEIGHT - paddle.rect.h;
-
-		// updateBalls(b, 1, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT, paddle);
-		// Update Balls state and calculate collisions
-    for (unsigned short i=0;i<ballsAmount;++i) {
-      manageWallCollision(b+i, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
-      managePaddleCollision(b+i, paddle);
-      // manageBricksCollision(b+i, bricks);
-      (b+i)->pos.x += (b+i)->vel.x;
-      (b+i)->pos.y += (b+i)->vel.y;
+      // updateBalls(b, 1, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT, paddle);
+      // Update Balls state and calculate collisions
+      for (unsigned short i=0;i<ballsAmount;++i) {
+        manageWallCollision(b+i, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
+        managePaddleCollision(b+i, paddle);
+        manageBricksCollision(bricks, b+i, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
+        (b+i)->pos.x += (b+i)->vel.x;
+        (b+i)->pos.y += (b+i)->vel.y;
+      }
     }
-
     SDL_RenderClear(gRenderer);
     SDL_RenderCopy(gRenderer, bgTexture, NULL, NULL);
     // SDL_RenderCopy(gRenderer, paddle.texture, NULL, &paddle.rect);
 		// Draw paddle rect
-		SDL_RenderDrawLine(gRenderer, 0, 0, 255, 255);
 		SDL_RenderFillRect(gRenderer, &paddle.rect);
-    renderBricks(bricks, gRenderer, brickTextures, rows, cols, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5);
-    // renderBall(*b, gRenderer, ballTexture);
-    renderBallSquare(*b, gRenderer);
+		renderBricks(bricks, gRenderer, brickTextures, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
+		// renderBall(*b, gRenderer, ballTexture);
+		renderBallSquare(*b, gRenderer);
+
+		/* SDL_RenderDrawLine(gRenderer, 0, 0, 255, 255); */
+    /* for (int i=0;i<cols;++i) { */
+    /*   SDL_RenderDrawLine(gRenderer, 15+(WINDOW_WIDTH-30)/co, 15+i*(WINDOW_HEIGHT-30)/rows); */
+    /* } */
+
     SDL_RenderPresent(gRenderer);
 
     SDL_Delay(1000 / FPS);
