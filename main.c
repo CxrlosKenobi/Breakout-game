@@ -36,8 +36,10 @@ int main() {
   SDL_Texture *bgTexture = SDL_CreateTextureFromSurface(gRenderer, bgSurface);
 
   // Bricks setup
-  const unsigned short rows = 8;
-  const unsigned short cols = 16;
+  const unsigned short rows = 6;
+  const unsigned short cols = 10;
+  const unsigned short MARGINX = 0;
+  const unsigned short MARGINY = 0;
   Brick **bricks = createRandomBrickMatrix(rows, cols);
   SDL_Surface *brickSurface[4];
   brickSurface[0] =  NULL;
@@ -74,6 +76,7 @@ int main() {
   paddle.speed.y = 0;
   int up = 0, down = 0, left = 0, right = 0;
   bool closeWindow = 0;
+  bool pause = 1;
   while (!closeWindow)
   {
     SDL_Event gameEvent;
@@ -86,32 +89,32 @@ int main() {
         break;
 
       case SDL_KEYDOWN:
-        switch (gameEvent.key.keysym.scancode)
-        {
-        case SDL_SCANCODE_UP:
-        case SDL_SCANCODE_W:
-          up = 1;
-          break;
-        case SDL_SCANCODE_DOWN:
-        case SDL_SCANCODE_S:
-          down = 1;
-          break;
-        case SDL_SCANCODE_LEFT:
-        case SDL_SCANCODE_A:
-          left = 1;
-          break;
-        case SDL_SCANCODE_RIGHT:
-        case SDL_SCANCODE_D:
-          right = 1;
-          break;
-        default:
-          break;
+        switch (gameEvent.key.keysym.scancode) {
+          // case SDL_SCANCODE_SPACE:
+          //   pause = !pause;
+          case SDL_SCANCODE_UP:
+          case SDL_SCANCODE_W:
+            up = 1;
+            break;
+          case SDL_SCANCODE_DOWN:
+          case SDL_SCANCODE_S:
+            down = 1;
+            break;
+          case SDL_SCANCODE_LEFT:
+          case SDL_SCANCODE_A:
+            left = 1;
+            break;
+          case SDL_SCANCODE_RIGHT:
+          case SDL_SCANCODE_D:
+            right = 1;
+            break;
+          default:
+            break;
         }
         break;
 
       case SDL_KEYUP:
-        switch (gameEvent.key.keysym.scancode)
-        {
+        switch (gameEvent.key.keysym.scancode) {
         case SDL_SCANCODE_UP:
         case SDL_SCANCODE_W:
           up = 0;
@@ -170,7 +173,7 @@ int main() {
     for (unsigned short i=0;i<ballsAmount;++i) {
       manageWallCollision(b+i, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
       managePaddleCollision(b+i, paddle);
-      // manageBricksCollision(b+i, bricks);
+      manageBricksCollision(bricks, b+i, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, MARGINX, MARGINY);
       (b+i)->pos.x += (b+i)->vel.x;
       (b+i)->pos.y += (b+i)->vel.y;
     }
@@ -178,7 +181,7 @@ int main() {
     SDL_RenderClear(gRenderer);
     SDL_RenderCopy(gRenderer, bgTexture, NULL, NULL);
     SDL_RenderCopy(gRenderer, paddle.texture, NULL, &paddle.rect);
-    renderBricks(bricks, gRenderer, brickTextures, rows, cols, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5);
+    renderBricks(bricks, gRenderer, brickTextures, WINDOW_WIDTH, 2 * WINDOW_HEIGHT / 5, rows, cols, MARGINX, MARGINY);
     renderBall(*b, gRenderer, ballTexture);
     SDL_RenderPresent(gRenderer);
 

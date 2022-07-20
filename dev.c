@@ -1,187 +1,204 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <stdbool.h>
+#include <math.h>
+#include <time.h>
 //
+#include "modules/main.h"
 #include "modules/structs.h"
+#include "modules/Paddle/init.h"
+#include "modules/CollidingBall/CollidingBall.h"
+#include "modules/Bricks/Bricks.h"
 #include "utils/utils.h"
-#include "modules/CollidingBall"
 
+/* Global Settings */
+#define FPS (50)
+#define SPEED (300)
+
+
+// Leave'em as this type of const pls, need it for ball calculating collides with walls
 const unsigned short WINDOW_WIDTH = 640;
 const unsigned short WINDOW_HEIGHT = 480;
-const unsigned short SPEED = 300;
 
-int main (void) {
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
-    printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+
+SDL_Window *gWindow = NULL;
+SDL_Renderer *gRenderer = NULL;
+
+int main() {
+  srand(time(NULL));
+  bool start = Initialize("Breakout!", WINDOW_WIDTH, WINDOW_HEIGHT, &gWindow, &gRenderer);
+  if (!start)
     return 1;
+
+  SDL_Surface *bgSurface = IMG_Load("assets/sprites/fondoOscuro.png");
+  SDL_Texture *bgTexture = SDL_CreateTextureFromSurface(gRenderer, bgSurface);
+
+  // Bricks setup
+  const unsigned short rows = 6;
+  const unsigned short cols = 10;
+  Brick **bricks = createRandomBrickMatrix(rows, cols);
+  SDL_Surface *brickSurface[4];
+  brickSurface[0] =  NULL;
+  brickSurface[1] =  IMG_Load("assets/sprites/bloqueNaranja.png");
+  brickSurface[2] =  IMG_Load("assets/sprites/bloqueVerde.png");
+  brickSurface[3] =  IMG_Load("assets/sprites/bloqueAzul.png");
+  SDL_Texture *brickTextures[4];
+  brickTextures[1] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[1]);
+  brickTextures[2] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[2]);
+  brickTextures[3] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[3]);
+
+  // Ball setup
+  Ball *b = malloc(sizeof(Ball));
+  unsigned short ballsAmount = 1;
+  initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
+  SDL_Surface *ballSurface = IMG_Load("assets/sprites/ball.png");
+  SDL_Texture *ballTexture = SDL_CreateTextureFromSurface(gRenderer, ballSurface);
+
+  // Paddle setup
+  Paddle paddle;
+  bool summon_paddle = initPaddle(
+      &paddle,
+      &gRenderer,
+      &paddle.surface,
+      &paddle.texture);
+  if (!summon_paddle)
+    return 1;
+
+  // Place the paddle in the center of the screen
+  paddle.xPos = WINDOW_WIDTH / 2 - paddle.rect.w / 2;
+  paddle.yPos = WINDOW_HEIGHT / 2 - paddle.rect.h / 2;
+
+  paddle.speed.x = 0;
+  paddle.speed.y = 0;
+  int up = 0, down = 0, left = 0, right = 0;
+  bool closeWindow = 0;
+  bool pause = true;
+  while (!closeWindow) {
+    SDL_Event gameEvent;
+    while (SDL_PollEvent(&gameEvent))
+    {
+      switch (gameEvent.type)
+      {
+      case SDL_QUIT:
+        closeWindow = 1;
+        break;
+
+      case SDL_KEYDOWN:
+        switch (gameEvent.key.keysym.scancode) {
+          case SDL_SCANCODE_SPACE:
+            pause = !pause;
+          case SDL_SCANCODE_UP:
+          case SDL_SCANCODE_W:
+            up = 1;
+            break;
+          case SDL_SCANCODE_DOWN:
+          case SDL_SCANCODE_S:
+            down = 1;
+            break;
+          case SDL_SCANCODE_LEFT:
+          case SDL_SCANCODE_A:
+            left = 1;
+            break;
+          case SDL_SCANCODE_RIGHT:
+          case SDL_SCANCODE_D:
+            right = 1;
+            break;
+          default:
+            break;
+        }
+        break;
+
+      case SDL_KEYUP:
+        switch (gameEvent.key.keysym.scancode)
+        {
+        case SDL_SCANCODE_UP:
+        case SDL_SCANCODE_W:
+          up = 0;
+          break;
+        case SDL_SCANCODE_DOWN:
+        case SDL_SCANCODE_S:
+          down = 0;
+          break;
+        case SDL_SCANCODE_LEFT:
+        case SDL_SCANCODE_A:
+          left = 0;
+          break;
+        case SDL_SCANCODE_RIGHT:
+        case SDL_SCANCODE_D:
+          right = 0;
+          break;
+        default:
+          break;
+        }
+        break;
+
+      default:
+        break;
+      }
+    }
+    if (!pause) {
+      paddle.speed.x = 0;
+      paddle.speed.y = 0;
+      if (up == 1 && down == 0)
+        paddle.speed.y = -SPEED;
+      if (down == 1 && up == 0)
+        paddle.speed.y = SPEED;
+      if (left == 1 && right == 0)
+        paddle.speed.x = -SPEED;
+      if (right == 1 && left == 0)
+        paddle.speed.x = SPEED;
+
+      paddle.xPos += paddle.speed.x / 60;
+      // paddle.yPos += paddle.speed.y / 60;
+      paddle.yPos = 400;
+
+      paddle.rect.x = (int)paddle.xPos;
+      paddle.rect.y = (int)paddle.yPos;
+
+      // Keep player sprite in the bounds of the window
+      if (paddle.xPos <= 0)
+        paddle.xPos = 0;
+      if (paddle.yPos <= 0)
+        paddle.yPos = 0;
+      if (paddle.xPos >= (WINDOW_WIDTH - paddle.rect.w))
+        paddle.xPos = WINDOW_WIDTH - paddle.rect.w;
+      if (paddle.yPos >= (WINDOW_HEIGHT - paddle.rect.h))
+        paddle.yPos = WINDOW_HEIGHT - paddle.rect.h;
+
+      // updateBalls(b, 1, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT, paddle);
+      // Update Balls state and calculate collisions
+      for (unsigned short i=0;i<ballsAmount;++i) {
+        manageWallCollision(b+i, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
+        managePaddleCollision(b+i, paddle);
+        manageBricksCollision(bricks, b+i, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
+        (b+i)->pos.x += (b+i)->vel.x;
+        (b+i)->pos.y += (b+i)->vel.y;
+      }
+    }
+    SDL_RenderClear(gRenderer);
+    SDL_RenderCopy(gRenderer, bgTexture, NULL, NULL);
+    // SDL_RenderCopy(gRenderer, paddle.texture, NULL, &paddle.rect);
+		// Draw paddle rect
+		SDL_RenderFillRect(gRenderer, &paddle.rect);
+		renderBricks(bricks, gRenderer, brickTextures, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
+		// renderBall(*b, gRenderer, ballTexture);
+		renderBallSquare(*b, gRenderer);
+
+		/* SDL_RenderDrawLine(gRenderer, 0, 0, 255, 255); */
+    /* for (int i=0;i<cols;++i) { */
+    /*   SDL_RenderDrawLine(gRenderer, 15+(WINDOW_WIDTH-30)/co, 15+i*(WINDOW_HEIGHT-30)/rows); */
+    /* } */
+
+    SDL_RenderPresent(gRenderer);
+
+    SDL_Delay(1000 / FPS);
   }
+  freeBricks(bricks, rows);
+  SDL_DestroyRenderer(gRenderer);
+  SDL_DestroyWindow(gWindow);
+  SDL_Quit();
 
-  SDL_Window *gWindow = SDL_CreateWindow(
-    "WASD & Arrows",
-    SDL_WINDOWPOS_CENTERED,
-    SDL_WINDOWPOS_CENTERED,
-    WINDOW_WIDTH,
-    WINDOW_HEIGHT, 0
-  );
-
-	Uint32 renderFlags = SDL_RENDERER_ACCELERATED; // This is the flag for hardware acceleration.
-	SDL_Renderer *gRenderer = SDL_CreateRenderer(gWindow, -1, renderFlags); // Create a renderer for the window.
-	
-	if (!gRenderer) {
-		printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
-		SDL_DestroyWindow(gWindow);
-		SDL_Quit();
-		return 1;
-	}
-
-	SDL_Surface *bgSurface = IMG_Load("assets/sprites/breakoutFondo.png");
-	SDL_Surface *baseSurface = IMG_Load("assets/dude.png");
-	if (!baseSurface) {
-		printf("Error[base]: %s\n", IMG_GetError());
-		SDL_DestroyRenderer(gRenderer);
-		SDL_DestroyWindow(gWindow);
-		SDL_Quit();
-		return 1;
-	}
-
-	SDL_Texture *bgTexture = SDL_CreateTextureFromSurface(gRenderer, bgSurface);
-	SDL_Texture *baseTexture = SDL_CreateTextureFromSurface(gRenderer, baseSurface);
-
-	SDL_FreeSurface(baseSurface);
-	SDL_FreeSurface(bgSurface);
-	SDL_Rect bgRectangle = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
-
-	if (!bgTexture) {
-		printf("Error [bgTexture]: %s\n", SDL_GetError());
-		SDL_DestroyRenderer(gRenderer);
-		SDL_DestroyWindow(gWindow);
-		SDL_Quit();
-		return 1;
-	}
-
-	if (!baseTexture) {
-		printf("Error [baseTexture]: %s\n", SDL_GetError());
-		SDL_DestroyRenderer(gRenderer);
-		SDL_DestroyWindow(gWindow);
-		SDL_Quit();
-		return 1;
-	}
-
-	SDL_Rect baseRectangle;
-	SDL_QueryTexture(
-		baseTexture,
-		NULL, NULL,
-		&baseRectangle.w,
-		&baseRectangle.h
-	);
-
-	baseRectangle.w /= 4;
-	baseRectangle.h /= 4;
-
-	float xPosition = WINDOW_WIDTH / 2 - baseRectangle.w / 2;
-	float yPosition = WINDOW_HEIGHT / 2 - baseRectangle.h / 2;
-	float xSpeed = 0, ySpeed = 0;
-
-	int up = 0, down = 0, left = 0, right = 0;
-	bool closeWindow = 0;
-	while (closeWindow == 0) {
-		SDL_Event gameEvent;
-		while (SDL_PollEvent(&gameEvent)) {
-			switch (gameEvent.type) {
-				case SDL_QUIT:
-					closeWindow = 1;
-					break;
-				
-				case SDL_KEYDOWN:
-					switch (gameEvent.key.keysym.scancode) {
-						case SDL_SCANCODE_UP:
-						case SDL_SCANCODE_W:
-							up = 1;
-							break;
-						case SDL_SCANCODE_DOWN:
-						case SDL_SCANCODE_S:
-							down = 1;
-							break;
-						case SDL_SCANCODE_LEFT:
-						case SDL_SCANCODE_A:
-							left = 1;
-							break;
-						case SDL_SCANCODE_RIGHT:
-						case SDL_SCANCODE_D:
-							right = 1;
-							break;
-						default:
-							break;
-					}
-					break;
-
-				case SDL_KEYUP:
-					switch (gameEvent.key.keysym.scancode) {
-						case SDL_SCANCODE_UP:
-						case SDL_SCANCODE_W:
-							up = 0;
-							break;
-						case SDL_SCANCODE_DOWN:
-						case SDL_SCANCODE_S:
-							down = 0;
-							break;
-						case SDL_SCANCODE_LEFT:
-						case SDL_SCANCODE_A:
-							left = 0;
-							break;
-						case SDL_SCANCODE_RIGHT:
-						case SDL_SCANCODE_D:
-							right = 0;
-							break;
-						default:
-							break;
-					}
-					break;
-				
-				default:
-					break;
-			}
-		}
-
-		xSpeed = 0; ySpeed = 0;
-		if (up == 1 && down == 0)
-			ySpeed = -SPEED;
-		if (down == 1 && up == 0)
-			ySpeed = SPEED;
-		if (left == 1 && right == 0)
-			xSpeed = -SPEED;
-		if (right == 1 && left == 0)
-			xSpeed = SPEED;
-		
-		xPosition += xSpeed / 60;
-		yPosition += ySpeed / 60;
-
-		baseRectangle.x = (int)xPosition;
-		baseRectangle.y = (int)yPosition;
-
-		// Keep player sprite in the bounds of the window
-		if (xPosition <= 0)
-			xPosition = 0;
-		if (yPosition <= 0)
-			yPosition = 0;
-		if (xPosition >= (WINDOW_WIDTH - baseRectangle.w))
-			xPosition = WINDOW_WIDTH - baseRectangle.w;
-		if (yPosition >= (WINDOW_HEIGHT - baseRectangle.h))
-			yPosition = WINDOW_HEIGHT - baseRectangle.h;
-
-		SDL_RenderClear(gRenderer);
-		SDL_RenderCopy(gRenderer, bgTexture, NULL, &bgRectangle);
-		SDL_RenderCopy(gRenderer, baseTexture, NULL, &baseRectangle);
-		SDL_RenderPresent(gRenderer);
-
-		SDL_Delay(1000 / 60);
-	}
-
-	SDL_DestroyRenderer(gRenderer);
-	SDL_DestroyWindow(gWindow);
-	SDL_Quit();
-	
-	return 0;
+  return 0;
 }
