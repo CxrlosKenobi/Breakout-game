@@ -43,9 +43,9 @@ int main() {
   Brick **bricks = createRandomBrickMatrix(rows, cols);
   SDL_Surface *brickSurface[4];
   brickSurface[0] =  NULL;
-  brickSurface[1] =  IMG_Load("assets/sprites/bloqueNaranja.png");
-  brickSurface[2] =  IMG_Load("assets/sprites/bloqueVerde.png");
-  brickSurface[3] =  IMG_Load("assets/sprites/bloqueAzul.png");
+  brickSurface[1] =  IMG_Load("assets/sprites/bricks/bloqueNaranja.png");
+  brickSurface[2] =  IMG_Load("assets/sprites/bricks/bloqueVerde.png");
+  brickSurface[3] =  IMG_Load("assets/sprites/bricks/bloqueAzul.png");
   SDL_Texture *brickTextures[4];
   brickTextures[1] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[1]);
   brickTextures[2] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[2]);
