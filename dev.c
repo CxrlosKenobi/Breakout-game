@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 #include <stdbool.h>
 #include <math.h>
 #include <time.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 //
 #include "modules/main.h"
 #include "modules/structs.h"
@@ -34,6 +35,10 @@ int main() {
 
   SDL_Surface *bgSurface = IMG_Load("assets/sprites/fondoOscuro.png");
   SDL_Texture *bgTexture = SDL_CreateTextureFromSurface(gRenderer, bgSurface);
+  TTF_Font* minecraftFont = NULL;
+  minecraftFont = TTF_OpenFont("assets/fonts/Minecraft.ttf", 28);
+  if (minecraftFont == NULL)
+    printf("An error has occured while loading minecraft font\nSDL_Error: %s\n", SDL_GetError());
 
   // Bricks setup
   const unsigned short rows = 6;
@@ -185,11 +190,6 @@ int main() {
 		renderBricks(bricks, gRenderer, brickTextures, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
 		// renderBall(*b, gRenderer, ballTexture);
 		renderBallSquare(*b, gRenderer);
-
-		/* SDL_RenderDrawLine(gRenderer, 0, 0, 255, 255); */
-    /* for (int i=0;i<cols;++i) { */
-    /*   SDL_RenderDrawLine(gRenderer, 15+(WINDOW_WIDTH-30)/co, 15+i*(WINDOW_HEIGHT-30)/rows); */
-    /* } */
 
     SDL_RenderPresent(gRenderer);
 

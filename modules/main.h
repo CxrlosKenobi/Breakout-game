@@ -14,6 +14,11 @@ bool Initialize (
 		return false;
 	}
 
+	if (TTF_Init() < 0) {
+		printf("Error while initializing ttf.h\n");
+		return false;
+	}
+
 	*gWindow = SDL_CreateWindow(
 		wTitle,
 		SDL_WINDOWPOS_CENTERED,
