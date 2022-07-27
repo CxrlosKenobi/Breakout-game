@@ -17,7 +17,7 @@
 #include "views/credits.h"
 
 /* Global Settings */
-#define FPS (50)
+#define FPS (60)
 #define SPEED (300)
 
 
@@ -223,12 +223,12 @@ int main() {
         }
         SDL_RenderClear(gRenderer);
         SDL_RenderCopy(gRenderer, bgTexture, NULL, NULL);
-        // SDL_RenderCopy(gRenderer, paddle.texture, NULL, &paddle.rect);
+        SDL_RenderCopy(gRenderer, paddle.texture, NULL, &paddle.rect);
         // Draw paddle rect
-        SDL_RenderFillRect(gRenderer, &paddle.rect);
+        // SDL_RenderFillRect(gRenderer, &paddle.rect);
         renderBricks(bricks, gRenderer, brickTextures, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
-        // renderBall(*b, gRenderer, ballTexture);
-        renderBallSquare(*b, gRenderer);
+        renderBall(*b, gRenderer, ballTexture);
+        // renderBallSquare(*b, gRenderer);
 
         SDL_RenderPresent(gRenderer);
 
