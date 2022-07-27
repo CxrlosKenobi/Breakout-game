@@ -19,9 +19,8 @@ void manageWallCollision (Ball *b, bool *gameOver, unsigned short gameWidth, uns
 
 void manageBricksCollision (Brick **bricks, Ball *b, cus WINDOW_WIDTH, cus WINDOW_HEIGHT, cus rows, cus cols, cus MARGINX, cus  MARGINY) {
   cus margin = 7;
-  const short limInfx = b->pos.x - (b->radius) - MARGINX;
+  short limInfx = b->pos.x - (b->radius) - MARGINX;
   const short limSupx = b->pos.x + (b->radius) - MARGINX;
-  // const short limInfy = b->pos.y - (b->radius) - MARGINY;
   short limInfy = b->pos.y - (b->radius) - MARGINY;
   const short limSupy = b->pos.y + (b->radius) - MARGINY;
   bool collided = false;
@@ -31,7 +30,8 @@ void manageBricksCollision (Brick **bricks, Ball *b, cus WINDOW_WIDTH, cus WINDO
     if (b->vel.x < 0) { // choca por derecha
       // if ((brick_width-margin <= limInfx%brick_width && limInfx%brick_width <= brick_width) || ((!limInfx%brick_width) && limInfx > 0)) {
       if ((brick_width-limInfx%brick_width <= margin) || (!(limInfx%brick_width) && limInfx > 0)) {
-        // printf("choque por derecha\n");
+        if (!(limInfx%brick_width))
+        limInfx -= brick_width;
         if (limInfx/brick_width < cols) {
           if (limInfy/brick_height < rows) {
             if (bricks[limInfy/brick_height][limInfx/brick_width].health) {
@@ -84,8 +84,8 @@ void manageBricksCollision (Brick **bricks, Ball *b, cus WINDOW_WIDTH, cus WINDO
         if (limInfy/brick_height < rows) {
           if (limInfx%brick_width < cols) {
             if (bricks[limInfy/brick_height][limInfx/brick_width].health) {
-              printf("choque por abajo1\n");
-              printf("Chocaría con el bloque en la posicion (%d, %d)\n", limInfx/brick_width, limInfy/brick_height);
+              // printf("choque por abajo1\n");
+              // printf("Chocaría con el bloque en la posicion (%d, %d)\n", limInfx/brick_width, limInfy/brick_height);
               b->vel.y = abs(b->vel.y);
               if (!collided)
                 bricks[limInfy/brick_height][limInfx/brick_width].health--;
@@ -94,8 +94,8 @@ void manageBricksCollision (Brick **bricks, Ball *b, cus WINDOW_WIDTH, cus WINDO
           }
           if (limSupx/brick_width < cols) {
             if (bricks[limInfy/brick_height][limSupx/brick_width].health) {
-              printf("choque por abajo2\n");
-              printf("Choque con el bloque en la posicion (%d, %d)\n", limSupx/brick_width, limInfy/brick_height);
+              // printf("choque por abajo2\n");
+              // printf("Choque con el bloque en la posicion (%d, %d)\n", limSupx/brick_width, limInfy/brick_height);
               b->vel.y = abs(b->vel.y);
               if (!collided)
                 bricks[limInfy/brick_height][limSupx/brick_width].health--;

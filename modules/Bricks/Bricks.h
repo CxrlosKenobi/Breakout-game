@@ -18,8 +18,8 @@ Brick** createRandomBrickMatrix (const unsigned short rows, const unsigned short
       bricks[i][j].power = 0;
     }
 	}
-  printf("The generated matrix is:\n");
-  printBrickMatrix(bricks, rows, cols);
+  // printf("The generated matrix is:\n");
+  // printBrickMatrix(bricks, rows, cols);
   return bricks;
 }
 void freeBricks (Brick **bricks, const unsigned short m) {
