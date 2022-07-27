@@ -4,21 +4,16 @@
 #include <SDL2/SDL_ttf.h>
 
 
-bool renderText (char* text, int x, int y, SDL_Renderer* renderer, TTF_Font* font) {
-	SDL_Color White = {255, 255, 255};
+bool renderText (char* text, SDL_Rect msgRect, SDL_Renderer* renderer, TTF_Font* font, SDL_Color color) {
+	bool val = false;
 	SDL_Surface* surfaceMessage = NULL;
-	surfaceMessage = TTF_RenderText_Solid(font, text, White);
-	// if (surfaceMessage == NULL)
-	// 	printf("An error has occured during the creation of surface message\n");
+	surfaceMessage = TTF_RenderText_Solid(font, text, color);
 	SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
-	SDL_Rect msgRect;
-	msgRect.x = x;
-	msgRect.y = y;
-	msgRect.w = 300;
-	msgRect.h = 200;
-	SDL_RenderCopy(renderer, Message, NULL, &msgRect);
+	if (!SDL_RenderCopy(renderer, Message, NULL, &msgRect))
+		val = true;
 	SDL_FreeSurface(surfaceMessage);
 	SDL_DestroyTexture(Message);
+	return val;
 }
 
 bool LoadSurfaceTextureIMG (
