@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+#include <SDL2/SDL_mixer.h>
 
 typedef const unsigned short cus;
 
@@ -100,17 +101,20 @@ void manageBricksCollision (Brick **bricks, Ball *b, cus WINDOW_WIDTH, cus WINDO
   }
 }
 
-void managePaddleCollision (Ball *b, Paddle p) {
+void managePaddleCollision (Ball *b, Paddle p, Mix_Chunk *sound) {
   const unsigned short marginx = 6;
   const unsigned short marginy = 8;
-  if ((p.rect.y-p.rect.h <= b->pos.y - marginy && b->pos.y <= p.rect.y) && (p.rect.x-marginx <= b->pos.x && b->pos.x <= p.rect.x+p.rect.w+marginx))
+  if ((p.rect.y-p.rect.h <= b->pos.y - marginy && b->pos.y <= p.rect.y) && (p.rect.x-marginx <= b->pos.x && b->pos.x <= p.rect.x+p.rect.w+marginx)){
+    Mix_PlayChannel(-1, sound, 0);
     b->vel.y = abs(b->vel.y) * -1;
+    
+  }
 }
 
 void updateBalls (Ball *b, unsigned short n, bool *gameOver, unsigned short gameWidth, unsigned short gameHeight, Paddle paddle) {
   for (unsigned short i=0;i<n;++i) {
     manageWallCollision(b+i, gameOver, gameWidth, gameHeight);
-    managePaddleCollision(b+i, paddle);
+    managePaddleCollision(b+i, paddle, NULL);
     /* manageBricksCollision(b+i); */
     b->pos.x += b->vel.x;
     b->pos.y += b->vel.y;

@@ -1,4 +1,3 @@
-
 // Global
 typedef struct {
 	int x;
@@ -44,3 +43,8 @@ typedef struct {
 	Speed vel;
 	unsigned short radius;
 } Ball;
+
+typedef struct{
+	Mix_Chunk *sound;
+	Mix_Music *music;
+} Mixers;

@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <math.h>
 #include <time.h>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_ttf.h>
 //
 #include "modules/main.h"
 #include "modules/structs.h"
@@ -51,13 +53,23 @@ int main() {
   brickTextures[2] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[2]);
   brickTextures[3] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[3]);
 
+  //Sounds setups
+  // Take the sound and music from the structs.h file
+  Mixers mixers;
+  mixers.sound = Mix_LoadWAV("assets/sounds/bounce.wav");
+  mixers.music = Mix_LoadMUS("assets/sounds/song.mp3");
+
+  if(!mixers.music || !mixers.sound)
+    printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
+
+  Mix_PlayMusic(mixers.music, -1);
+
   // Ball setup
   Ball *b = malloc(sizeof(Ball));
   unsigned short ballsAmount = 1;
   initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
   SDL_Surface *ballSurface = IMG_Load("assets/sprites/ball.png");
   SDL_Texture *ballTexture = SDL_CreateTextureFromSurface(gRenderer, ballSurface);
-
   // Paddle setup
   Paddle paddle;
   bool summon_paddle = initPaddle(
@@ -67,7 +79,15 @@ int main() {
       &paddle.texture);
   if (!summon_paddle)
     return 1;
-
+  //Font setup
+  SDL_Color textColor = {255, 255, 255};
+  TTF_Font *font = NULL;
+  font = TTF_OpenFont("assets/fonts/DePixelBreit.ttf", 30);
+  SDL_Surface *PointsSurface = TTF_RenderText_Solid(font, "Puntos: 0",textColor );
+  SDL_Texture *PointsTexture = SDL_CreateTextureFromSurface(gRenderer, PointsSurface);
+  SDL_Rect PointsRect = {30, 30, PointsSurface->w, PointsSurface->h};
+  TTF_CloseFont(font);
+  SDL_FreeSurface(PointsSurface);
   // Place the paddle in the center of the screen
   paddle.xPos = WINDOW_WIDTH / 2 - paddle.rect.w / 2;
   paddle.yPos = WINDOW_HEIGHT / 2 - paddle.rect.h / 2;
@@ -172,7 +192,7 @@ int main() {
 		// updateBalls(b, 1, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT, paddle);
     for (unsigned short i=0;i<ballsAmount;++i) {
       manageWallCollision(b+i, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
-      managePaddleCollision(b+i, paddle);
+      managePaddleCollision(b+i, paddle, mixers.sound);
       manageBricksCollision(bricks, b+i, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, MARGINX, MARGINY);
       (b+i)->pos.x += (b+i)->vel.x;
       (b+i)->pos.y += (b+i)->vel.y;
@@ -183,6 +203,7 @@ int main() {
     SDL_RenderCopy(gRenderer, paddle.texture, NULL, &paddle.rect);
     renderBricks(bricks, gRenderer, brickTextures, WINDOW_WIDTH, 2 * WINDOW_HEIGHT / 5, rows, cols, MARGINX, MARGINY);
     renderBall(*b, gRenderer, ballTexture);
+    SDL_RenderCopy(gRenderer, PointsTexture, NULL, &PointsRect);
     SDL_RenderPresent(gRenderer);
 
     SDL_Delay(1000 / FPS);
