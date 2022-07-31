@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 #include <math.h>
 #include <time.h>
@@ -17,7 +18,7 @@
 #include "views/credits.h"
 
 /* Global Settings */
-#define FPS (60)
+#define FPS (50)
 #define SPEED (300)
 
 
@@ -27,6 +28,13 @@ const unsigned short WINDOW_HEIGHT = 480;
 
 enum menu_option {menu, game, highscores, credits, quit};
 
+
+typedef struct {
+  unsigned val;
+  char string[11];
+  SDL_Rect rect;
+  SDL_Color color;
+}Score;
 
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
@@ -41,15 +49,34 @@ int main() {
   SDL_Texture *bgTexture = SDL_CreateTextureFromSurface(gRenderer, bgSurface);
   SDL_Surface *menuBgSurface = IMG_Load("assets/sprites/scenes/breakoutFondo.png");
   SDL_Texture *menuBgTexture = SDL_CreateTextureFromSurface(gRenderer, menuBgSurface);
+  SDL_Surface *menuTitleSurface = IMG_Load("assets/Images/title.png");
+  SDL_Surface *heartSurface = IMG_Load("assets/sprites/minecraft_heart.png");
+  SDL_Texture *heartTexture = SDL_CreateTextureFromSurface(gRenderer, heartSurface);
+  SDL_Rect menuTitleRect;
+  menuTitleRect.x = 65;
+  menuTitleRect.y = 0;
+  menuTitleRect.w = 500;
+  menuTitleRect.h = 200;
+  SDL_Texture *menuTitleTexture = SDL_CreateTextureFromSurface(gRenderer, menuTitleSurface);
   TTF_Font* minecraftFont = NULL;
-  minecraftFont = TTF_OpenFont("assets/fonts/Minecraft.ttf", 28);
+  minecraftFont = TTF_OpenFont("assets/fonts/SF Atarian System Extended Bold Italic.ttf", 40);
+  // minecraftFont = TTF_OpenFont("assets/fonts/ARCADECLASSIC.ttf", 40);
   if (minecraftFont == NULL)
     printf("An error has occured while loading minecraft font\nSDL_Error: %s\n", SDL_GetError());
+  Score score;
+  score.rect.x = 10;
+  score.rect.y = 420;
+  score.rect.w = 110;
+  score.rect.h = 30;
+  score.color.r = score.color.g = score.color.b = 0;
+  unsigned lives = 3;
 
   // Bricks setup
   const unsigned short rows = 6;
   const unsigned short cols = 10;
-  Brick **bricks = createRandomBrickMatrix(rows, cols);
+  unsigned bricks_amount;
+  // Brick **bricks = createRandomBrickMatrix(rows, cols, &bricks_amount);
+  Brick **bricks;
   SDL_Surface *brickSurface[4];
   brickSurface[0] =  NULL;
   brickSurface[1] =  IMG_Load("assets/sprites/bricks/bloqueNaranja.png");
@@ -86,8 +113,12 @@ int main() {
   int up = 0, down = 0, left = 0, right = 0;
   bool closeWindow = 0;
   bool pause = true;
+  bool win = false;
+  bool lose = true;
+  bool frame = true;
   unsigned short view = menu;
   unsigned short hoveredOption = game;
+  score.val = 0;
   SDL_Event gameEvent;
   while (!closeWindow) {
     switch (view) {
@@ -110,13 +141,28 @@ int main() {
                   break;
                 case SDL_SCANCODE_RETURN:
                   view = hoveredOption;
+                  initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
+                  initPaddle(&paddle, &gRenderer, &paddle.surface, &paddle.texture);
+                  paddle.xPos = WINDOW_WIDTH / 2 - paddle.rect.w / 2;
+                  paddle.yPos = WINDOW_HEIGHT / 2 - paddle.rect.h / 2;
+                  paddle.speed.x = 0;
+                  paddle.speed.y = 0;
+                  bricks = createRandomBrickMatrix(rows, cols, &bricks_amount);
+                  up = down = left = right = 0;
+                  pause = true;
+                  score.val = 0;
+                  win = false;
+                  lose = false;
+                  lives = 3;
+                  frame = true;
                   break;
-              }
+                }
               break;
           }
         }
         SDL_RenderClear(gRenderer);
         SDL_RenderCopy(gRenderer, menuBgTexture, NULL, NULL);
+        SDL_RenderCopy(gRenderer, menuTitleTexture, NULL, &menuTitleRect);
         renderMenu(hoveredOption, gRenderer, minecraftFont);
         SDL_RenderPresent(gRenderer);
         SDL_Delay(1000 / FPS);
@@ -186,13 +232,13 @@ int main() {
           paddle.speed.x = 0;
           paddle.speed.y = 0;
           if (up == 1 && down == 0)
-            paddle.speed.y = -SPEED;
+            paddle.speed.y = -SPEED/2;
           if (down == 1 && up == 0)
-            paddle.speed.y = SPEED;
+            paddle.speed.y = SPEED/2;
           if (left == 1 && right == 0)
-            paddle.speed.x = -SPEED;
+            paddle.speed.x = -SPEED/2;
           if (right == 1 && left == 0)
-            paddle.speed.x = SPEED;
+            paddle.speed.x = SPEED/2;
 
           paddle.xPos += paddle.speed.x / 60;
           // paddle.yPos += paddle.speed.y / 60;
@@ -211,28 +257,59 @@ int main() {
           if (paddle.yPos >= (WINDOW_HEIGHT - paddle.rect.h))
             paddle.yPos = WINDOW_HEIGHT - paddle.rect.h;
 
-          // updateBalls(b, 1, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT, paddle);
           // Update Balls state and calculate collisions
           for (unsigned short i=0;i<ballsAmount;++i) {
-            manageWallCollision(b+i, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
+            if (manageWallCollision(b+i, &view, WINDOW_WIDTH, WINDOW_HEIGHT)) {
+              initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
+              initPaddle(&paddle, &gRenderer, &paddle.surface, &paddle.texture);
+              paddle.xPos = WINDOW_WIDTH / 2 - paddle.rect.w / 2;
+              paddle.yPos = WINDOW_HEIGHT / 2 - paddle.rect.h / 2;
+              paddle.rect.x = paddle.xPos;
+              paddle.speed.x = 0;
+              paddle.speed.y = 0;
+              up = down = left = right = 0;
+              pause = true;
+              frame = false;
+              lives--;
+            }
+
             managePaddleCollision(b+i, paddle);
-            manageBricksCollision(bricks, b+i, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
-            (b+i)->pos.x += (b+i)->vel.x;
-            (b+i)->pos.y += (b+i)->vel.y;
+            if (manageBricksCollision(bricks, b+i, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0, &score.val, &bricks_amount)) {
+              // printf("Bricks amount: %u\n", bricks_amount);
+            }
+            (b+i)->pos.x += ((b+i)->vel.x) / 2;
+            (b+i)->pos.y += ((b+i)->vel.y) / 2;
           }
+          if (!bricks_amount)
+            win = true;
+          if (!lives) {
+            lose = true;
+          }
+          if (win || lose) {
+            view = menu;
+          }
+          frame = !frame;
         }
-        SDL_RenderClear(gRenderer);
-        SDL_RenderCopy(gRenderer, bgTexture, NULL, NULL);
-        SDL_RenderCopy(gRenderer, paddle.texture, NULL, &paddle.rect);
-        // Draw paddle rect
-        // SDL_RenderFillRect(gRenderer, &paddle.rect);
-        renderBricks(bricks, gRenderer, brickTextures, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
-        renderBall(*b, gRenderer, ballTexture);
-        // renderBallSquare(*b, gRenderer);
+        // printf("Velocity of ball in x: %f\n", b->vel.x);
+        // printf("Velocity of ball in y: %f\n\n", b->vel.y);
+        if (frame) {
+          SDL_RenderClear(gRenderer);
+          SDL_RenderCopy(gRenderer, bgTexture, NULL, NULL);
+          SDL_RenderCopy(gRenderer, paddle.texture, NULL, &paddle.rect);
+          // Draw paddle rect
+          // SDL_RenderFillRect(gRenderer, &paddle.rect);
+          renderBricks(bricks, gRenderer, brickTextures, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
+          renderBall(*b, gRenderer, ballTexture);
+          sprintf(score.string, "score: %4d", score.val);
+          // itoa(score.val, score.string, 10);
+          renderText(score.string, score.rect, gRenderer, minecraftFont, score.color); // render Score
+          renderLives(gRenderer, lives, heartTexture);
+          // renderBallSquare(*b, gRenderer);
 
-        SDL_RenderPresent(gRenderer);
+          SDL_RenderPresent(gRenderer);
+        }
 
-        SDL_Delay(1000 / FPS);
+        SDL_Delay(1000 / (FPS * 2)); // The 2 is for doing the double of calculations
         break;
       case highscores:
         while (SDL_PollEvent(&gameEvent)) {
@@ -268,7 +345,20 @@ int main() {
         break;
     }
   }
+  // SDL_Surface *bgSurface = IMG_Load("assets/sprites/scenes/fondoOscuro.png");
+  // SDL_Texture *bgTexture = SDL_CreateTextureFromSurface(gRenderer, bgSurface);
+  // SDL_Surface *menuBgSurface = IMG_Load("assets/sprites/scenes/breakoutFondo.png");
+  // SDL_Texture *menuBgTexture = SDL_CreateTextureFromSurface(gRenderer, menuBgSurface);
+  // SDL_Surface *menuTitleSurface = IMG_Load("assets/Images/title.png");
+  // SDL_Surface *heartSurface = IMG_Load("assets/sprites/minecraft_heart.png");
   freeBricks(bricks, rows);
+  SDL_FreeSurface(bgSurface);
+  SDL_DestroyTexture(bgTexture);
+  SDL_FreeSurface(menuBgSurface);
+  SDL_DestroyTexture(menuBgTexture);
+  SDL_FreeSurface(menuTitleSurface);
+  SDL_DestroyTexture(menuTitleTexture);
+
   SDL_DestroyRenderer(gRenderer);
   SDL_DestroyWindow(gWindow);
   SDL_Quit();

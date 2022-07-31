@@ -264,6 +264,7 @@ int main() {
               initPaddle(&paddle, &gRenderer, &paddle.surface, &paddle.texture);
               paddle.xPos = WINDOW_WIDTH / 2 - paddle.rect.w / 2;
               paddle.yPos = WINDOW_HEIGHT / 2 - paddle.rect.h / 2;
+              paddle.rect.x = paddle.xPos;
               paddle.speed.x = 0;
               paddle.speed.y = 0;
               up = down = left = right = 0;
