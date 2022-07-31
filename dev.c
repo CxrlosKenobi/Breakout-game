@@ -285,7 +285,12 @@ int main() {
           if (!lives) {
             lose = true;
           }
-          if (win || lose) {
+          if (win) {
+            view = menu;
+            if (managePossibleNewHighScore(score.val)) {
+              // do Something
+            }
+          } else if (lose) {
             view = menu;
           }
           frame = !frame;
@@ -345,12 +350,6 @@ int main() {
         break;
     }
   }
-  // SDL_Surface *bgSurface = IMG_Load("assets/sprites/scenes/fondoOscuro.png");
-  // SDL_Texture *bgTexture = SDL_CreateTextureFromSurface(gRenderer, bgSurface);
-  // SDL_Surface *menuBgSurface = IMG_Load("assets/sprites/scenes/breakoutFondo.png");
-  // SDL_Texture *menuBgTexture = SDL_CreateTextureFromSurface(gRenderer, menuBgSurface);
-  // SDL_Surface *menuTitleSurface = IMG_Load("assets/Images/title.png");
-  // SDL_Surface *heartSurface = IMG_Load("assets/sprites/minecraft_heart.png");
   freeBricks(bricks, rows);
   SDL_FreeSurface(bgSurface);
   SDL_DestroyTexture(bgTexture);

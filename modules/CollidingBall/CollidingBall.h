@@ -23,39 +23,39 @@ bool manageWallCollision (Ball *b, unsigned short *view, unsigned short gameWidt
   return false;
 }
 
-bool manageInferiorBrickCollision (Brick **bricks, const Ball b, const unsigned distance, const unsigned n, bool x_axis) {
-  cus margin = 7;
-  short limInf;
-  short limSup;
-  short half;
-  unsigned short x;
-  unsigned short y;
-  const int crit = distance - margin;
-  if (x_axis) {
-    limInf = limSup = half = b.pos.x;
-    y = b.pos.y;
-  } else {
-    limInf = limSup = half = b.pos.y;
-    x = b.pos.x;
-  }
+// bool manageInferiorBrickCollision (Brick **bricks, const Ball b, const unsigned distance, const unsigned n, bool x_axis) {
+//   cus margin = 7;
+//   short limInf;
+//   short limSup;
+//   short half;
+//   unsigned short x;
+//   unsigned short y;
+//   const int crit = distance - margin;
+//   if (x_axis) {
+//     limInf = limSup = half = b.pos.x;
+//     y = b.pos.y;
+//   } else {
+//     limInf = limSup = half = b.pos.y;
+//     x = b.pos.x;
+//   }
 
-  if (limSup < crit) return false;
+//   if (limSup < crit) return false;
 
-  limInf -= b.radius;
-  limSup += b.radius;
-  limInf %= distance;
-  half %= distance;
-  limSup %= distance;
-  if (!limInf) limInf += distance;
-  if (!half) half += distance;
-  if (!limSup) limSup += distance;
-  return false;
+//   limInf -= b.radius;
+//   limSup += b.radius;
+//   limInf %= distance;
+//   half %= distance;
+//   limSup %= distance;
+//   if (!limInf) limInf += distance;
+//   if (!half) half += distance;
+//   if (!limSup) limSup += distance;
+//   return false;
 
-  // if ((crit < limInf || crit < half || crit < limSup) && )
-  // if (crit < limInf && )
+//   // if ((crit < limInf || crit < half || crit < limSup) && )
+//   // if (crit < limInf && )
 
   // if (!limInf || )
-}
+// }
 
 bool manageBricksCollision (Brick **bricks, Ball *b, cus WINDOW_WIDTH, cus WINDOW_HEIGHT, cus rows, cus cols, cus MARGINX, cus  MARGINY, unsigned *score, unsigned *bricks_amount) {
   cus margin = 7;
