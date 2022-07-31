@@ -3,19 +3,21 @@
 
 void renderMenu (unsigned short option, SDL_Renderer* renderer, TTF_Font* font) {
 	SDL_Color color = {0, 0, 0};
-	const unsigned short letter_width = 15;
+	unsigned short letter_width = 20;
 	SDL_Rect rect;
 	rect.y = 270;
 	rect.w = 5 * letter_width;
 	rect.x = (640 - rect.w) / 2;
-	rect.h = 30;
+	rect.h = 33;
 	if (option == 1)
 		color.r = color.g = color.b = 100;
 	renderText("Start", rect, renderer, font, color);
 
+ letter_width = 15;
 	rect.y += 50;
 	rect.w = 11 * letter_width;
 	rect.x = (640 - rect.w) / 2;
+	rect.h = 30;
 	color.r = color.g = color.b = 0;
 	if (option == 2)
 		color.r = color.g = color.b = 100;
@@ -29,6 +31,8 @@ void renderMenu (unsigned short option, SDL_Renderer* renderer, TTF_Font* font) 
 		color.r = color.g = color.b = 100;
 	renderText("Credits", rect, renderer, font, color);
 
+	letter_width = 13;
+	rect.h = 26;
 	rect.y += 50;
 	rect.w = 4 * letter_width;
 	rect.x = (640 - rect.w) / 2;

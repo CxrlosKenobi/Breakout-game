@@ -3,6 +3,21 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
+void renderLives (SDL_Renderer *renderer, unsigned lives, SDL_Texture *texture) {
+	SDL_Rect rect;
+	rect.x = 560;
+	rect.y = 430;
+	rect.w = 16;
+	rect.h = 16;
+	if (lives)
+		SDL_RenderCopy(renderer, texture, NULL, &rect);
+	rect.x += 20;
+	if (lives > 1)
+		SDL_RenderCopy(renderer, texture, NULL, &rect);
+	rect.x += 20;
+	if (lives > 2)
+		SDL_RenderCopy(renderer, texture, NULL, &rect);
+}
 
 bool renderText (char* text, SDL_Rect msgRect, SDL_Renderer* renderer, TTF_Font* font, SDL_Color color) {
 	bool val = false;

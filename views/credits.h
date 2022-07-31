@@ -14,6 +14,11 @@ void renderCredits (SDL_Renderer *renderer, TTF_Font *font) {
 	rect.h = 60;
 	rect.w = letter_width * strlen(text) * 2;
 	renderText(text, rect, renderer, font, color);
+
+	rect.x = 60;
+	rect.y = 150;
+	rect.h = 50;
+	
 	
 	// rect.x = 
 	// SDL_RenderCopy(renderer, texture, NULL, NULL);
