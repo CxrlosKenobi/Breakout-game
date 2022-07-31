@@ -1,5 +1,18 @@
-
 // Global
+
+typedef struct {
+	bool PAUSE;
+	bool WIN;
+	bool LOSE;
+} GameState;
+
+typedef struct {
+  unsigned val;
+  char text[11];
+  SDL_Rect rect;
+  SDL_Color color;
+} Score;
+
 typedef struct {
 	float x;
 	float y;

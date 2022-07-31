@@ -1,10 +1,11 @@
 //* Paddle *//
-
 bool initPaddle(
   Paddle *paddle,
   SDL_Renderer **gRenderer,
   SDL_Surface **surface,
-  SDL_Texture **texture
+  SDL_Texture **texture,
+  int WINDOW_WIDTH,
+  int WINDOW_HEIGHT
 ) {
 
   paddle -> sprite_path = "assets/sprites/paddle.png";
@@ -31,8 +32,11 @@ bool initPaddle(
     &paddle -> rect.h
   );
 
-  // paddle -> rect.w /= 3; // Downscaling
-  // paddle -> rect.h /= 3; // Downscaling
+
+  // Place the paddle in the center of the screen
+  paddle -> xPos = (WINDOW_WIDTH / 2) - (paddle -> rect.w / 2);
+  paddle -> yPos = (WINDOW_HEIGHT / 2) - (paddle -> rect.h / 2);
+  paddle -> speed.x = 0;
 
   return true;
 }
