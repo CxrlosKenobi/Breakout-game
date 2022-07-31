@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <math.h>
 #include <time.h>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_ttf.h>
 //
 #include "modules/main.h"
 #include "modules/structs.h"
@@ -14,7 +16,7 @@
 #include "utils/utils.h"
 
 /* Global Settings */
-#define FPS (50)
+#define FPS (60)
 #define SPEED (300)
 
 
@@ -38,6 +40,8 @@ int main() {
   // Bricks setup
   const unsigned short rows = 6;
   const unsigned short cols = 10;
+  const unsigned short MARGINX = 0;
+  const unsigned short MARGINY = 0;
   Brick **bricks = createRandomBrickMatrix(rows, cols);
   SDL_Surface *brickSurface[4];
   brickSurface[0] =  NULL;
@@ -49,13 +53,23 @@ int main() {
   brickTextures[2] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[2]);
   brickTextures[3] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[3]);
 
+  //Sounds setups
+  // Take the sound and music from the structs.h file
+  Mixers mixers;
+  mixers.sound = Mix_LoadWAV("assets/sounds/bounce.wav");
+  mixers.music = Mix_LoadMUS("assets/sounds/song.mp3");
+
+  if(!mixers.music || !mixers.sound)
+    printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
+
+  Mix_PlayMusic(mixers.music, -1);
+
   // Ball setup
   Ball *b = malloc(sizeof(Ball));
   unsigned short ballsAmount = 1;
   initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
   SDL_Surface *ballSurface = IMG_Load("assets/sprites/ball.png");
   SDL_Texture *ballTexture = SDL_CreateTextureFromSurface(gRenderer, ballSurface);
-
   // Paddle setup
   Paddle paddle;
   bool summon_paddle = initPaddle(
@@ -65,7 +79,15 @@ int main() {
       &paddle.texture);
   if (!summon_paddle)
     return 1;
-
+  //Font setup
+  SDL_Color textColor = {255, 255, 255};
+  TTF_Font *font = NULL;
+  font = TTF_OpenFont("assets/fonts/DePixelBreit.ttf", 30);
+  SDL_Surface *PointsSurface = TTF_RenderText_Solid(font, "Puntos: 0",textColor );
+  SDL_Texture *PointsTexture = SDL_CreateTextureFromSurface(gRenderer, PointsSurface);
+  SDL_Rect PointsRect = {30, 30, PointsSurface->w, PointsSurface->h};
+  TTF_CloseFont(font);
+  SDL_FreeSurface(PointsSurface);
   // Place the paddle in the center of the screen
   paddle.xPos = WINDOW_WIDTH / 2 - paddle.rect.w / 2;
   paddle.yPos = WINDOW_HEIGHT / 2 - paddle.rect.h / 2;
@@ -74,8 +96,9 @@ int main() {
   paddle.speed.y = 0;
   int up = 0, down = 0, left = 0, right = 0;
   bool closeWindow = 0;
-  bool pause = true;
-  while (!closeWindow) {
+  bool pause = 1;
+  while (!closeWindow)
+  {
     SDL_Event gameEvent;
     while (SDL_PollEvent(&gameEvent))
     {
@@ -87,8 +110,8 @@ int main() {
 
       case SDL_KEYDOWN:
         switch (gameEvent.key.keysym.scancode) {
-          case SDL_SCANCODE_SPACE:
-            pause = !pause;
+          // case SDL_SCANCODE_SPACE:
+          //   pause = !pause;
           case SDL_SCANCODE_UP:
           case SDL_SCANCODE_W:
             up = 1;
@@ -111,8 +134,7 @@ int main() {
         break;
 
       case SDL_KEYUP:
-        switch (gameEvent.key.keysym.scancode)
-        {
+        switch (gameEvent.key.keysym.scancode) {
         case SDL_SCANCODE_UP:
         case SDL_SCANCODE_W:
           up = 0;
@@ -138,59 +160,50 @@ int main() {
         break;
       }
     }
-    if (!pause) {
-      paddle.speed.x = 0;
-      paddle.speed.y = 0;
-      if (up == 1 && down == 0)
-        paddle.speed.y = -SPEED;
-      if (down == 1 && up == 0)
-        paddle.speed.y = SPEED;
-      if (left == 1 && right == 0)
-        paddle.speed.x = -SPEED;
-      if (right == 1 && left == 0)
-        paddle.speed.x = SPEED;
 
-      paddle.xPos += paddle.speed.x / 60;
-      // paddle.yPos += paddle.speed.y / 60;
-      paddle.yPos = 400;
+    paddle.speed.x = 0;
+    paddle.speed.y = 0;
+    if (up == 1 && down == 0)
+      paddle.speed.y = -SPEED;
+    if (down == 1 && up == 0)
+      paddle.speed.y = SPEED;
+    if (left == 1 && right == 0)
+      paddle.speed.x = -SPEED;
+    if (right == 1 && left == 0)
+      paddle.speed.x = SPEED;
 
-      paddle.rect.x = (int)paddle.xPos;
-      paddle.rect.y = (int)paddle.yPos;
+    paddle.xPos += paddle.speed.x / 60;
+    // paddle.yPos += paddle.speed.y / 60;
+    paddle.yPos = 400;
 
-      // Keep player sprite in the bounds of the window
-      if (paddle.xPos <= 0)
-        paddle.xPos = 0;
-      if (paddle.yPos <= 0)
-        paddle.yPos = 0;
-      if (paddle.xPos >= (WINDOW_WIDTH - paddle.rect.w))
-        paddle.xPos = WINDOW_WIDTH - paddle.rect.w;
-      if (paddle.yPos >= (WINDOW_HEIGHT - paddle.rect.h))
-        paddle.yPos = WINDOW_HEIGHT - paddle.rect.h;
+    paddle.rect.x = (int)paddle.xPos;
+    paddle.rect.y = (int)paddle.yPos;
 
-      // updateBalls(b, 1, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT, paddle);
-      // Update Balls state and calculate collisions
-      for (unsigned short i=0;i<ballsAmount;++i) {
-        manageWallCollision(b+i, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
-        managePaddleCollision(b+i, paddle);
-        manageBricksCollision(bricks, b+i, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
-        (b+i)->pos.x += (b+i)->vel.x;
-        (b+i)->pos.y += (b+i)->vel.y;
-      }
+    // Keep player sprite in the bounds of the window
+    if (paddle.xPos <= 0)
+      paddle.xPos = 0;
+    if (paddle.yPos <= 0)
+      paddle.yPos = 0;
+    if (paddle.xPos >= (WINDOW_WIDTH - paddle.rect.w))
+      paddle.xPos = WINDOW_WIDTH - paddle.rect.w;
+    if (paddle.yPos >= (WINDOW_HEIGHT - paddle.rect.h))
+      paddle.yPos = WINDOW_HEIGHT - paddle.rect.h;
+
+		// updateBalls(b, 1, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT, paddle);
+    for (unsigned short i=0;i<ballsAmount;++i) {
+      manageWallCollision(b+i, &closeWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
+      managePaddleCollision(b+i, paddle, mixers.sound);
+      manageBricksCollision(bricks, b+i, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, MARGINX, MARGINY);
+      (b+i)->pos.x += (b+i)->vel.x;
+      (b+i)->pos.y += (b+i)->vel.y;
     }
+
     SDL_RenderClear(gRenderer);
     SDL_RenderCopy(gRenderer, bgTexture, NULL, NULL);
-    // SDL_RenderCopy(gRenderer, paddle.texture, NULL, &paddle.rect);
-		// Draw paddle rect
-		SDL_RenderFillRect(gRenderer, &paddle.rect);
-		renderBricks(bricks, gRenderer, brickTextures, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
-		// renderBall(*b, gRenderer, ballTexture);
-		renderBallSquare(*b, gRenderer);
-
-		/* SDL_RenderDrawLine(gRenderer, 0, 0, 255, 255); */
-    /* for (int i=0;i<cols;++i) { */
-    /*   SDL_RenderDrawLine(gRenderer, 15+(WINDOW_WIDTH-30)/co, 15+i*(WINDOW_HEIGHT-30)/rows); */
-    /* } */
-
+    SDL_RenderCopy(gRenderer, paddle.texture, NULL, &paddle.rect);
+    renderBricks(bricks, gRenderer, brickTextures, WINDOW_WIDTH, 2 * WINDOW_HEIGHT / 5, rows, cols, MARGINX, MARGINY);
+    renderBall(*b, gRenderer, ballTexture);
+    SDL_RenderCopy(gRenderer, PointsTexture, NULL, &PointsRect);
     SDL_RenderPresent(gRenderer);
 
     SDL_Delay(1000 / FPS);
