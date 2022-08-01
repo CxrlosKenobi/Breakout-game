@@ -11,30 +11,20 @@
 #include "modules/main.h"
 #include "modules/structs.h"
 #include "modules/Paddle/init.h"
+#include "modules/Paddle/controller.h"
 #include "modules/CollidingBall/CollidingBall.h"
 #include "modules/Bricks/Bricks.h"
 #include "utils/utils.h"
 #include "views/menu.h"
 #include "views/credits.h"
-
-/* Global Settings */
+//
 #define FPS (50)
-#define SPEED (300)
+#define SPEED (600)
 
-
-// Leave'em as this type of const pls, need it for ball calculating collides with walls
 const unsigned short WINDOW_WIDTH = 640;
 const unsigned short WINDOW_HEIGHT = 480;
 
 enum menu_option {menu, game, highscores, credits, quit};
-
-
-typedef struct {
-  unsigned val;
-  char string[11];
-  SDL_Rect rect;
-  SDL_Color color;
-}Score;
 
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
@@ -42,8 +32,7 @@ SDL_Renderer *gRenderer = NULL;
 int main() {
   srand(time(NULL));
   bool start = Initialize("Breakout!", WINDOW_WIDTH, WINDOW_HEIGHT, &gWindow, &gRenderer);
-  if (!start)
-    return 1;
+  if (!start) return 1;
 
   SDL_Surface *bgSurface = IMG_Load("assets/sprites/scenes/fondoOscuro.png");
   SDL_Texture *bgTexture = SDL_CreateTextureFromSurface(gRenderer, bgSurface);
@@ -52,36 +41,39 @@ int main() {
   SDL_Surface *menuTitleSurface = IMG_Load("assets/Images/title.png");
   SDL_Surface *heartSurface = IMG_Load("assets/sprites/minecraft_heart.png");
   SDL_Texture *heartTexture = SDL_CreateTextureFromSurface(gRenderer, heartSurface);
+
   SDL_Rect menuTitleRect;
   menuTitleRect.x = 65;
   menuTitleRect.y = 0;
   menuTitleRect.w = 500;
   menuTitleRect.h = 200;
+
   SDL_Texture *menuTitleTexture = SDL_CreateTextureFromSurface(gRenderer, menuTitleSurface);
   TTF_Font* minecraftFont = NULL;
   minecraftFont = TTF_OpenFont("assets/fonts/SF Atarian System Extended Bold Italic.ttf", 40);
-  // minecraftFont = TTF_OpenFont("assets/fonts/ARCADECLASSIC.ttf", 40);
   if (minecraftFont == NULL)
     printf("An error has occured while loading minecraft font\nSDL_Error: %s\n", SDL_GetError());
+
   Score score;
   score.rect.x = 10;
   score.rect.y = 420;
   score.rect.w = 110;
   score.rect.h = 30;
   score.color.r = score.color.g = score.color.b = 0;
-  unsigned lives = 3;
+  unsigned lives = 3; 
 
   // Bricks setup
   const unsigned short rows = 6;
   const unsigned short cols = 10;
   unsigned bricks_amount;
-  // Brick **bricks = createRandomBrickMatrix(rows, cols, &bricks_amount);
+
   Brick **bricks;
   SDL_Surface *brickSurface[4];
   brickSurface[0] =  NULL;
-  brickSurface[1] =  IMG_Load("assets/sprites/bricks/bloqueNaranja.png");
-  brickSurface[2] =  IMG_Load("assets/sprites/bricks/bloqueVerde.png");
-  brickSurface[3] =  IMG_Load("assets/sprites/bricks/bloqueAzul.png");
+  brickSurface[1] =  IMG_Load("assets/sprites/bricks/503208.png");
+  brickSurface[2] =  IMG_Load("assets/sprites/bricks/503307.png");
+  brickSurface[3] =  IMG_Load("assets/sprites/bricks/503354.png");
+
   SDL_Texture *brickTextures[4];
   brickTextures[1] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[1]);
   brickTextures[2] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[2]);
@@ -97,19 +89,15 @@ int main() {
   // Paddle setup
   Paddle paddle;
   bool summon_paddle = initPaddle(
-      &paddle,
-      &gRenderer,
-      &paddle.surface,
-      &paddle.texture);
-  if (!summon_paddle)
-    return 1;
+    &paddle,
+    &gRenderer,
+    &paddle.surface,
+    &paddle.texture,
+    WINDOW_WIDTH,
+    WINDOW_HEIGHT
+  );
+  if (!summon_paddle) return 1;
 
-  // Place the paddle in the center of the screen
-  paddle.xPos = WINDOW_WIDTH / 2 - paddle.rect.w / 2;
-  paddle.yPos = WINDOW_HEIGHT / 2 - paddle.rect.h / 2;
-
-  paddle.speed.x = 0;
-  paddle.speed.y = 0;
   int up = 0, down = 0, left = 0, right = 0;
   bool closeWindow = 0;
   bool pause = true;
@@ -119,6 +107,7 @@ int main() {
   unsigned short view = menu;
   unsigned short hoveredOption = game;
   score.val = 0;
+
   SDL_Event gameEvent;
   while (!closeWindow) {
     switch (view) {
@@ -142,11 +131,7 @@ int main() {
                 case SDL_SCANCODE_RETURN:
                   view = hoveredOption;
                   initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
-                  initPaddle(&paddle, &gRenderer, &paddle.surface, &paddle.texture);
-                  paddle.xPos = WINDOW_WIDTH / 2 - paddle.rect.w / 2;
-                  paddle.yPos = WINDOW_HEIGHT / 2 - paddle.rect.h / 2;
-                  paddle.speed.x = 0;
-                  paddle.speed.y = 0;
+                  centerPaddle(&paddle, WINDOW_WIDTH, WINDOW_HEIGHT);
                   bricks = createRandomBrickMatrix(rows, cols, &bricks_amount);
                   up = down = left = right = 0;
                   pause = true;
@@ -229,44 +214,13 @@ int main() {
             }
         }
         if (!pause) {
-          paddle.speed.x = 0;
-          paddle.speed.y = 0;
-          if (up == 1 && down == 0)
-            paddle.speed.y = -SPEED/2;
-          if (down == 1 && up == 0)
-            paddle.speed.y = SPEED/2;
-          if (left == 1 && right == 0)
-            paddle.speed.x = -SPEED/2;
-          if (right == 1 && left == 0)
-            paddle.speed.x = SPEED/2;
-
-          paddle.xPos += paddle.speed.x / 60;
-          // paddle.yPos += paddle.speed.y / 60;
-          paddle.yPos = 400;
-
-          paddle.rect.x = (int)paddle.xPos;
-          paddle.rect.y = (int)paddle.yPos;
-
-          // Keep player sprite in the bounds of the window
-          if (paddle.xPos <= 0)
-            paddle.xPos = 0;
-          if (paddle.yPos <= 0)
-            paddle.yPos = 0;
-          if (paddle.xPos >= (WINDOW_WIDTH - paddle.rect.w))
-            paddle.xPos = WINDOW_WIDTH - paddle.rect.w;
-          if (paddle.yPos >= (WINDOW_HEIGHT - paddle.rect.h))
-            paddle.yPos = WINDOW_HEIGHT - paddle.rect.h;
+          movePaddle(&paddle, up, down, left, right, WINDOW_WIDTH, WINDOW_HEIGHT, SPEED);
 
           // Update Balls state and calculate collisions
-          for (unsigned short i=0;i<ballsAmount;++i) {
+          for (unsigned short i = 0; i < ballsAmount; ++i) {
             if (manageWallCollision(b+i, &view, WINDOW_WIDTH, WINDOW_HEIGHT)) {
               initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
-              initPaddle(&paddle, &gRenderer, &paddle.surface, &paddle.texture);
-              paddle.xPos = WINDOW_WIDTH / 2 - paddle.rect.w / 2;
-              paddle.yPos = WINDOW_HEIGHT / 2 - paddle.rect.h / 2;
-              paddle.rect.x = paddle.xPos;
-              paddle.speed.x = 0;
-              paddle.speed.y = 0;
+              centerPaddle(&paddle, WINDOW_WIDTH, WINDOW_HEIGHT);
               up = down = left = right = 0;
               pause = true;
               frame = false;
@@ -277,32 +231,25 @@ int main() {
             if (manageBricksCollision(bricks, b+i, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0, &score.val, &bricks_amount)) {
               // printf("Bricks amount: %u\n", bricks_amount);
             }
-            (b+i)->pos.x += ((b+i)->vel.x) / 2;
-            (b+i)->pos.y += ((b+i)->vel.y) / 2;
+            (b+i) -> pos.x += ((b+i) -> vel.x) / 2;
+            (b+i) -> pos.y += ((b+i) -> vel.y) / 2;
           }
-          if (!bricks_amount)
-            win = true;
-          if (!lives) {
-            lose = true;
-          }
-          if (win || lose) {
-            view = menu;
-          }
+          if (!bricks_amount) win = true;
+          if (!lives) lose = true;
+          if (win || lose) view = menu;
+
           frame = !frame;
         }
-        // printf("Velocity of ball in x: %f\n", b->vel.x);
-        // printf("Velocity of ball in y: %f\n\n", b->vel.y);
+
         if (frame) {
           SDL_RenderClear(gRenderer);
           SDL_RenderCopy(gRenderer, bgTexture, NULL, NULL);
           SDL_RenderCopy(gRenderer, paddle.texture, NULL, &paddle.rect);
-          // Draw paddle rect
-          // SDL_RenderFillRect(gRenderer, &paddle.rect);
           renderBricks(bricks, gRenderer, brickTextures, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
           renderBall(*b, gRenderer, ballTexture);
-          sprintf(score.string, "score: %4d", score.val);
-          // itoa(score.val, score.string, 10);
-          renderText(score.string, score.rect, gRenderer, minecraftFont, score.color); // render Score
+          sprintf(score.text, "Score: %d", score.val);
+          // itoa(score.val, score.text, 10);
+          renderText(score.text, score.rect, gRenderer, minecraftFont, score.color); // render Score
           renderLives(gRenderer, lives, heartTexture);
           // renderBallSquare(*b, gRenderer);
 
