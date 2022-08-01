@@ -90,16 +90,27 @@ int main() {
 
   //Sounds and mixer setup
   Mix_Music *music = NULL;
-  Mix_Chunk *sound = NULL;
+  Mix_Chunk *bounce = NULL;
+  Mix_Chunk *brickSound= NULL;
+  Mix_Chunk *selectionSound = NULL;
+
+  
   music = Mix_LoadMUS("assets/sounds/music.mp3");
-  sound = Mix_LoadWAV("assets/sounds/bounce.mp3");
+  bounce = Mix_LoadWAV("assets/sounds/bounce.mp3");
+  brickSound = Mix_LoadWAV("assets/sounds/brick.mp3");
+  selectionSound = Mix_LoadWAV("assets/sounds/selectionMenu.mp3");
   if (music == NULL)
     printf("An error has occured while loading music\nSDL_Error: %s\n", SDL_GetError());
-  if (sound == NULL)
+  if (bounce == NULL)
     printf("An error has occured while loading sound\nSDL_Error: %s\n", SDL_GetError());
+  if (brickSound == NULL)
+    printf("An error has occured while loading sound\nSDL_Error: %s\n", SDL_GetError());
+  Sound sounds;
+  sounds.bounce = brickSound;
   Mix_PlayMusic(music, -1);
   Mix_VolumeMusic(MIX_MAX_VOLUME/12);
 
+  Mix_VolumeChunk(bounce, MIX_MAX_VOLUME/12);
   // Ball setup
   Ball *b = malloc(sizeof(Ball));
   unsigned short ballsAmount = 1;
@@ -145,10 +156,12 @@ int main() {
             case SDL_KEYUP:
               switch (gameEvent.key.keysym.scancode) {
                 case SDL_SCANCODE_DOWN:
+                  Mix_PlayChannel(-1, selectionSound, 0);
                   if (hoveredOption == mute) hoveredOption = game;
                   else hoveredOption++;
                   break;
                 case SDL_SCANCODE_UP:
+                  Mix_PlayChannel(-1, selectionSound, 0);
                   if (hoveredOption == game) hoveredOption = mute;
                   else hoveredOption--;
                   break;
@@ -276,7 +289,7 @@ int main() {
 
           // Update Balls state and calculate collisions
           for (unsigned short i=0;i<ballsAmount;++i) {
-            if (manageWallCollision(b+i, &view, WINDOW_WIDTH, WINDOW_HEIGHT)) {
+            if (manageWallCollision(b+i, &view, WINDOW_WIDTH, WINDOW_HEIGHT, sounds.bounce)) {
               initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
               initPaddle(&paddle, &gRenderer, &paddle.surface, &paddle.texture);
               paddle.xPos = WINDOW_WIDTH / 2 - paddle.rect.w / 2;
@@ -288,11 +301,13 @@ int main() {
               pause = true;
               frame = false;
               lives--;
+              Mix_PlayChannel(-1,brickSound, 0);
             }
 
-            managePaddleCollision(b+i, paddle);
+            if(managePaddleCollision(b+i, paddle))
+              Mix_PlayChannel(-1, bounce, 0);
             if (manageBricksCollision(bricks, b+i, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0, &score.val, &bricks_amount)) {
-              // printf("Bricks amount: %u\n", bricks_amount);
+              Mix_PlayChannel(-1, brickSound, 0);
             }
             (b+i)->pos.x += ((b+i)->vel.x) / 2;
             (b+i)->pos.y += ((b+i)->vel.y) / 2;
