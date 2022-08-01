@@ -33,10 +33,11 @@ bool initPaddle(
   );
 
 
-  // Place the paddle in the center of the screen
+  // Placing the paddle
   paddle -> xPos = (WINDOW_WIDTH / 2) - (paddle -> rect.w / 2);
-  paddle -> yPos = (WINDOW_HEIGHT / 2) - (paddle -> rect.h / 2);
-  paddle -> speed.x = 0;
+  paddle -> yPos = 400;
+  paddle -> rect.x = (int)paddle -> xPos;
+  paddle -> rect.y = (int)paddle -> yPos;
 
   return true;
 }
