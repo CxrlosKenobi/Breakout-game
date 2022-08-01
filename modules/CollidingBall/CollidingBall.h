@@ -1,23 +1,31 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 
 typedef const unsigned short cus;
 
 // Returns true in lost
-bool manageWallCollision (Ball *b, unsigned short *view, unsigned short gameWidth, unsigned short gameHeight) {
+bool manageWallCollision (Ball *b, unsigned short *view, unsigned short gameWidth, unsigned short gameHeight, Mix_Chunk *bounce) {
   int limInfx = b->pos.x - b->radius;
   int limSupx = b->pos.x + b->radius;
   int limInfy = b->pos.y - b->radius;
   int limSupy = b->pos.y + b->radius;
   // if (limInfx <= 0 || gameWidth <= limSupx)
   //   b->vel.x *= -1;
-  if (limInfx <= 0)
+  if (limInfx <= 0){
+    Mix_PlayChannel(-1, bounce, 0);
     (b->vel.x) = fabs(b->vel.x);
-  else if (gameWidth <= limSupx)
+  }
+  else if (gameWidth <= limSupx){
+    Mix_PlayChannel(-1, bounce, 0);
     (b->vel.x) = fabs(b->vel.x) * -1;
-  if (limInfy <= 0)
+  }
+  if (limInfy <= 0){
+    Mix_PlayChannel(-1, bounce, 0);
     b->vel.y = fabs(b->vel.y);
+  }
   if (limSupy >= gameHeight) // loses a life
     return true;
   return false;
@@ -233,11 +241,14 @@ bool manageBricksCollision (Brick **bricks, Ball *b, cus WINDOW_WIDTH, cus WINDO
   return false;
 }
 
-void managePaddleCollision (Ball *b, Paddle p) {
+bool managePaddleCollision (Ball *b, Paddle p) {
   const unsigned short marginx = 6;
   const unsigned short marginy = 8;
-  if ((p.rect.y-p.rect.h <= b->pos.y - marginy && b->pos.y <= p.rect.y) && (p.rect.x-marginx <= b->pos.x && b->pos.x <= p.rect.x+p.rect.w+marginx))
+  if ((p.rect.y-p.rect.h <= b->pos.y - marginy && b->pos.y <= p.rect.y) && (p.rect.x-marginx <= b->pos.x && b->pos.x <= p.rect.x+p.rect.w+marginx)){
     b->vel.y = fabs(b->vel.y) * -1;
+    return true;
+    }
+  return false;
 }
 
 void initBall (Ball *b, cus gameWidth, cus gameHeight) {

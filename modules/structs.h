@@ -1,4 +1,4 @@
-
+#include <SDL2/SDL_mixer.h>
 // Global
 typedef struct {
 	float x;
@@ -44,3 +44,7 @@ typedef struct {
 	Speed vel;
 	unsigned short radius;
 } Ball;
+
+typedef struct {
+	Mix_Chunk *bounce;
+} Sound;
