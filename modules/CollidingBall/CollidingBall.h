@@ -233,12 +233,19 @@ bool manageBricksCollision (Brick **bricks, Ball *b, cus WINDOW_WIDTH, cus WINDO
   return false;
 }
 
-void managePaddleCollision (Ball *b, Paddle p) {
+void managePaddleCollision (Ball *ball, Paddle pad) {
   const unsigned short marginx = 6;
   const unsigned short marginy = 8;
-  if ((p.rect.y-p.rect.h <= b->pos.y - marginy && b->pos.y <= p.rect.y) && (p.rect.x-marginx <= b->pos.x && b->pos.x <= p.rect.x+p.rect.w+marginx))
-    b->vel.y = fabs(b->vel.y) * -1;
+
+  // When the ball hits anywhere in the paddle upper surface
+  if (
+    ((pad.rect.y - pad.rect.h) <= (ball -> pos.y - marginy) && ball -> pos.y <= pad.rect.y) &&
+    (pad.rect.x-marginx <= ball -> pos.x && ball -> pos.x <= pad.rect.x + pad.rect.w + marginx)
+  ) {
+    ball -> vel.y = fabs(ball -> vel.y) * -1;
+  }
 }
+
 
 void initBall (Ball *b, cus gameWidth, cus gameHeight) {
   const short int vel = 7;

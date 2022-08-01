@@ -38,6 +38,12 @@ typedef struct {
 	short power;
 } Paddle; // Manage from dynamic memory for better performance
 
+typedef struct {
+	Position pos;
+	Speed vel;
+	unsigned short radius;
+} Ball;
+
 // Background
 typedef struct {
 	SDL_Rect rect;
@@ -52,8 +58,3 @@ typedef struct {
 	short power;
 } Brick;
 
-typedef struct {
-	Position pos;
-	Speed vel;
-	unsigned short radius;
-} Ball;

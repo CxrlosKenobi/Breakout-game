@@ -41,11 +41,13 @@ int main() {
   SDL_Surface *menuTitleSurface = IMG_Load("assets/Images/title.png");
   SDL_Surface *heartSurface = IMG_Load("assets/sprites/minecraft_heart.png");
   SDL_Texture *heartTexture = SDL_CreateTextureFromSurface(gRenderer, heartSurface);
+
   SDL_Rect menuTitleRect;
   menuTitleRect.x = 65;
   menuTitleRect.y = 0;
   menuTitleRect.w = 500;
   menuTitleRect.h = 200;
+
   SDL_Texture *menuTitleTexture = SDL_CreateTextureFromSurface(gRenderer, menuTitleSurface);
   TTF_Font* minecraftFont = NULL;
   minecraftFont = TTF_OpenFont("assets/fonts/SF Atarian System Extended Bold Italic.ttf", 40);
@@ -68,9 +70,9 @@ int main() {
   Brick **bricks;
   SDL_Surface *brickSurface[4];
   brickSurface[0] =  NULL;
-  brickSurface[1] =  IMG_Load("assets/sprites/bricks/bloqueNaranja.png");
-  brickSurface[2] =  IMG_Load("assets/sprites/bricks/bloqueVerde.png");
-  brickSurface[3] =  IMG_Load("assets/sprites/bricks/bloqueAzul.png");
+  brickSurface[1] =  IMG_Load("assets/sprites/bricks/503208.png");
+  brickSurface[2] =  IMG_Load("assets/sprites/bricks/503307.png");
+  brickSurface[3] =  IMG_Load("assets/sprites/bricks/503354.png");
 
   SDL_Texture *brickTextures[4];
   brickTextures[1] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[1]);
@@ -87,12 +89,12 @@ int main() {
   // Paddle setup
   Paddle paddle;
   bool summon_paddle = initPaddle(
-      &paddle,
-      &gRenderer,
-      &paddle.surface,
-      &paddle.texture,
-      WINDOW_WIDTH,
-      WINDOW_HEIGHT
+    &paddle,
+    &gRenderer,
+    &paddle.surface,
+    &paddle.texture,
+    WINDOW_WIDTH,
+    WINDOW_HEIGHT
   );
   if (!summon_paddle) return 1;
 
@@ -105,6 +107,7 @@ int main() {
   unsigned short view = menu;
   unsigned short hoveredOption = game;
   score.val = 0;
+
   SDL_Event gameEvent;
   while (!closeWindow) {
     switch (view) {
@@ -211,30 +214,10 @@ int main() {
             }
         }
         if (!pause) {
-          paddle.speed.x = 0;
-          if (left == 1 && right == 0)
-            paddle.speed.x = -SPEED/2;
-          if (right == 1 && left == 0)
-            paddle.speed.x = SPEED/2;
-
-          paddle.xPos += paddle.speed.x / 60;
-          paddle.yPos = 400;
-
-          paddle.rect.x = (int)paddle.xPos;
-          paddle.rect.y = (int)paddle.yPos;
-
-          // Keep player sprite in the bounds of the window
-          if (paddle.xPos <= 0)
-            paddle.xPos = 0;
-          if (paddle.yPos <= 0)
-            paddle.yPos = 0;
-          if (paddle.xPos >= (WINDOW_WIDTH - paddle.rect.w))
-            paddle.xPos = WINDOW_WIDTH - paddle.rect.w;
-          if (paddle.yPos >= (WINDOW_HEIGHT - paddle.rect.h))
-            paddle.yPos = WINDOW_HEIGHT - paddle.rect.h;
+          movePaddle(&paddle, up, down, left, right, WINDOW_WIDTH, WINDOW_HEIGHT, SPEED);
 
           // Update Balls state and calculate collisions
-          for (unsigned short i=0;i<ballsAmount;++i) {
+          for (unsigned short i = 0; i < ballsAmount; ++i) {
             if (manageWallCollision(b+i, &view, WINDOW_WIDTH, WINDOW_HEIGHT)) {
               initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
               centerPaddle(&paddle, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -248,17 +231,13 @@ int main() {
             if (manageBricksCollision(bricks, b+i, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0, &score.val, &bricks_amount)) {
               // printf("Bricks amount: %u\n", bricks_amount);
             }
-            (b+i)->pos.x += ((b+i)->vel.x) / 2;
-            (b+i)->pos.y += ((b+i)->vel.y) / 2;
+            (b+i) -> pos.x += ((b+i) -> vel.x) / 2;
+            (b+i) -> pos.y += ((b+i) -> vel.y) / 2;
           }
-          if (!bricks_amount)
-            win = true;
-          if (!lives) {
-            lose = true;
-          }
-          if (win || lose) {
-            view = menu;
-          }
+          if (!bricks_amount) win = true;
+          if (!lives) lose = true;
+          if (win || lose) view = menu;
+
           frame = !frame;
         }
 
