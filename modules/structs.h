@@ -1,8 +1,8 @@
 
 // Global
 typedef struct {
-	int x;
-	int y;
+	float x;
+	float y;
 } Position;
 
 typedef struct {

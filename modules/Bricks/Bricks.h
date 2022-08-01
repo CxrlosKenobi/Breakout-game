@@ -6,7 +6,8 @@ void printBrickMatrix (Brick** m, unsigned short rows, unsigned short cols) {
   }
 }
 
-Brick** createRandomBrickMatrix (const unsigned short rows, const unsigned short cols) {
+Brick** createRandomBrickMatrix (const unsigned short rows, const unsigned short cols, unsigned *bricks_amount) {
+  *bricks_amount = 0;
 	Brick **bricks = malloc(rows * sizeof(Brick*));
 	for (unsigned short i=0;i<rows;++i) {
 		bricks[i] = malloc(cols * sizeof(Brick));
@@ -15,6 +16,8 @@ Brick** createRandomBrickMatrix (const unsigned short rows, const unsigned short
         bricks[i][j].health = 0;
       else
         bricks[i][j].health = rand() % 4;
+      if (bricks[i][j].health)
+        (*bricks_amount)++;
       bricks[i][j].power = 0;
     }
 	}
