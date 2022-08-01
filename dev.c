@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 //
 #include "modules/main.h"
 #include "modules/structs.h"
@@ -26,7 +27,7 @@
 const unsigned short WINDOW_WIDTH = 640;
 const unsigned short WINDOW_HEIGHT = 480;
 
-enum menu_option {menu, game, highscores, credits, quit};
+enum menu_option {menu, game, highscores, credits, quit, mute};
 
 
 typedef struct {
@@ -87,6 +88,18 @@ int main() {
   brickTextures[2] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[2]);
   brickTextures[3] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[3]);
 
+  //Sounds and mixer setup
+  Mix_Music *music = NULL;
+  Mix_Chunk *sound = NULL;
+  music = Mix_LoadMUS("assets/sounds/music.mp3");
+  sound = Mix_LoadWAV("assets/sounds/bounce.mp3");
+  if (music == NULL)
+    printf("An error has occured while loading music\nSDL_Error: %s\n", SDL_GetError());
+  if (sound == NULL)
+    printf("An error has occured while loading sound\nSDL_Error: %s\n", SDL_GetError());
+  Mix_PlayMusic(music, -1);
+  Mix_VolumeMusic(MIX_MAX_VOLUME/12);
+
   // Ball setup
   Ball *b = malloc(sizeof(Ball));
   unsigned short ballsAmount = 1;
@@ -132,14 +145,17 @@ int main() {
             case SDL_KEYUP:
               switch (gameEvent.key.keysym.scancode) {
                 case SDL_SCANCODE_DOWN:
-                  if (hoveredOption == quit) hoveredOption = game;
+                  if (hoveredOption == mute) hoveredOption = game;
                   else hoveredOption++;
                   break;
                 case SDL_SCANCODE_UP:
-                  if (hoveredOption == game) hoveredOption = quit;
+                  if (hoveredOption == game) hoveredOption = mute;
                   else hoveredOption--;
                   break;
                 case SDL_SCANCODE_RETURN:
+                  if(hoveredOption==mute)
+                    Mix_VolumeMusic(0)==0?Mix_VolumeMusic(MIX_MAX_VOLUME/12):Mix_VolumeMusic(0);
+                   else{
                   view = hoveredOption;
                   initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
                   initPaddle(&paddle, &gRenderer, &paddle.surface, &paddle.texture);
@@ -156,6 +172,7 @@ int main() {
                   lives = 3;
                   frame = true;
                   break;
+                  }
                 }
               break;
           }
@@ -168,7 +185,7 @@ int main() {
         SDL_Delay(1000 / FPS);
 
         break;
-      case game:
+      case game: ;
         SDL_Event gameEvent;
         while (SDL_PollEvent(&gameEvent)) {
           switch (gameEvent.type) {

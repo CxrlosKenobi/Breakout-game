@@ -43,9 +43,15 @@ bool Initialize (
 		printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
 		return false;
 	}
-
+	
+	if( Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 2048) == -1 )
+    {
+        return false;    
+    }
 	return true;
-}
+  }
+	
+
 
 // SDL_Texture *loadTexture (SDL_Renderer *gRenderer, char *path) {
 // 	SDL_Texture *newTexture = NULL;
