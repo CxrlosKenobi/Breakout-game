@@ -8,7 +8,7 @@ bool initPaddle(
   int WINDOW_HEIGHT
 ) {
 
-  paddle -> sprite_path = "assets/sprites/paddle.png";
+  paddle -> sprite_path = "assets/sprites/paddle2.png";
   *surface = IMG_Load(paddle -> sprite_path);
 	if (!*surface) {
     printf("Error[-1]: %s\n", IMG_GetError());
@@ -22,8 +22,8 @@ bool initPaddle(
     return false;
   }
 
-  paddle -> surface = *surface;
   paddle -> texture = *texture;
+  paddle -> surface = *surface;
 
   SDL_QueryTexture(
     paddle -> texture,
@@ -38,6 +38,9 @@ bool initPaddle(
   paddle -> yPos = 400;
   paddle -> rect.x = (int)paddle -> xPos;
   paddle -> rect.y = (int)paddle -> yPos;
+
+  paddle -> rect.w /= 2;
+  paddle -> rect.h /= 2;
 
   return true;
 }
