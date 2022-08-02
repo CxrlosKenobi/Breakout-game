@@ -1,3 +1,5 @@
+#include <SDL2/SDL_mixer.h>
+
 // Global
 
 typedef struct {
@@ -57,4 +59,14 @@ typedef struct {
 	unsigned short health;
 	short power;
 } Brick;
+
+typedef struct {
+	Position pos;
+	Speed vel;
+	unsigned short radius;
+} Ball;
+
+typedef struct {
+	Mix_Chunk *bounce;
+} Sound;
 

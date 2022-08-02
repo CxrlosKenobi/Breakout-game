@@ -2,7 +2,7 @@
 # Run.sh -- Our cool shortcut to run SDL2 packages at once.
 ###
 # runner="gcc main.c -o Breakout -lSDL2 -lSDL2_image";
-runner="gcc dev.c -o Breakout -lSDL2 -lSDL2_image -lSDL2_ttf -lm";
+runner="gcc dev.c -o Breakout -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lm";
  
 clear;
 echo -e "\e[90m[ \e[33m-\e[90m ] \e[33mCompiling ... \e[35m";
