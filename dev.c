@@ -391,6 +391,15 @@ int main() {
   SDL_FreeSurface(menuTitleSurface);
   SDL_DestroyTexture(menuTitleTexture);
 
+
+  // Free Mixer memory
+  Mix_FreeChunk(bounce);
+  Mix_FreeChunk(brickSound);
+  Mix_FreeChunk(selectionSound);
+  Mix_FreeMusic(music);
+  Mix_CloseAudio();
+  Mix_Quit();
+
   SDL_DestroyRenderer(gRenderer);
   SDL_DestroyWindow(gWindow);
   SDL_Quit();
