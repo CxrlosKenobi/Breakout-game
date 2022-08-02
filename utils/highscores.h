@@ -8,6 +8,16 @@ typedef struct {
 	unsigned val;
 } Highscore;
 
+bool validInput (char *input) {
+	if (strlen(input) > 10 || !strlen(input))
+		return false;
+	for (unsigned short i=0;i<strlen(input);++i) {
+		if (input[i] == ' ' || input[i] == '\t' || input[i] == '\n')
+			return false;
+	}
+	return true;
+}
+
 Highscore* getHighscores (unsigned short *amount, Highscore candidate) {
 	FILE *file = NULL;
 	file = fopen("utils/highscores.txt", "r");
@@ -52,38 +62,15 @@ char* getHighscoreFile () {
 	return string_file;
 }
 
-char unsignedToChar (unsigned n) {
-	switch (n) {
-		case 0:
-			return '0';
-		case 1:
-			return '1';
-		case 2:
-			return '2';
-		case 3:
-			return '3';
-		case 4:
-			return '4';
-		case 5:
-			return '5';
-		case 6:
-			return '6';
-	}
-}
-
 bool writeNewHighscore (char* string_file, unsigned short pos, Highscore hs, bool delete_last, unsigned short amount) {
 	FILE *file = NULL;
 	file = fopen("utils/highscores.txt", "w");
+	if (file = NULL)
+		return false;
 	unsigned short line = 0;
 	unsigned short i = 0;
-	// if (!delete_last)
-	// 	(*string_file)++;
-	if (!delete_last) {
-		unsigned short max;
-		max = *string_file - '0';
-		max++;
-		*string_file = unsignedToChar(max);
-	}
+	if (!delete_last) // increments number of highscores, since one will be added and no one deleted
+		(*string_file)++;
 	while (i < 300) {
 		while (string_file[i] != '\n') {
 			fprintf(file, "%c", string_file[i]);
@@ -109,6 +96,7 @@ bool writeNewHighscore (char* string_file, unsigned short pos, Highscore hs, boo
 	}
 	fclose(file);
 	free(string_file);
+	return true;
 }
 
 // candidate.name MUST NOT contain any space or endline, etc

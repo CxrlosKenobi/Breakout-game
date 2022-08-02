@@ -33,7 +33,7 @@ enum menu_option {menu, game, highscores, credits, quit, win_view};
 
 typedef struct {
   unsigned val;
-  char string[11];
+  char string[19];
   SDL_Rect rect;
   SDL_Color color;
 }Score;
@@ -70,7 +70,7 @@ int main() {
   score.rect.y = 420;
   score.rect.w = 110;
   score.rect.h = 30;
-  score.color.r = score.color.g = score.color.b = 0;
+  score.color.r = score.color.g = score.color.b = 255;
   unsigned lives = 3;
 
   // Bricks setup
@@ -124,15 +124,16 @@ int main() {
   score.val = 0;
   SDL_Event gameEvent;
   char input[11];
+  bool alert_input;
   SDL_Rect input_text_rect;
-  input_text_rect.x = 100;
+  input_text_rect.x = 140;
   input_text_rect.y = 220;
   // input_text_rect.w = 11 * 15;
   input_text_rect.h = 30;
   SDL_Color input_text_color;
-  input_text_color.r = 0;
-  input_text_color.g = 0;
-  input_text_color.b = 0;
+  input_text_color.r = 240;
+  input_text_color.g = 240;
+  input_text_color.b = 240;
   while (!closeWindow) {
     switch (view) {
       case menu:
@@ -152,6 +153,10 @@ int main() {
                   if (hoveredOption == game) hoveredOption = quit;
                   else hoveredOption--;
                   break;
+                }
+                break;
+            case SDL_KEYDOWN:
+              switch (gameEvent.key.keysym.scancode) {
                 case SDL_SCANCODE_RETURN:
                   view = hoveredOption;
                   initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -169,10 +174,12 @@ int main() {
                   lives = 3;
                   frame = true;
                   // THIS IS JUST FOR TESTING PLEASE DELETE BEFORE ANY COMMIT, DON'T BE STUPID YO FCKIN IDIOT
-                  // if (view == game) {
-                  //   view = win_view;
-                  //   score.val = 255;
-                  // }
+                  if (view == game) {
+                    view = win_view;
+                    score.val = 255;
+                    *input = '\0';
+                    SDL_StartTextInput();
+                  }
                   break;
                 }
               break;
@@ -307,15 +314,14 @@ int main() {
           }
           if (win) {
             view = win_view;
-            strcpy(input, "");
+            *input = '\0';
+            alert_input = false;
             SDL_StartTextInput();
           } else if (lose) {
             view = menu;
           }
           frame = !frame;
         }
-        // printf("Velocity of ball in x: %f\n", b->vel.x);
-        // printf("Velocity of ball in y: %f\n\n", b->vel.y);
         if (frame) {
           SDL_RenderClear(gRenderer);
           SDL_RenderCopy(gRenderer, bgTexture, NULL, NULL);
@@ -384,21 +390,29 @@ int main() {
           } else if (ev.type == SDL_TEXTINPUT || ev.type == SDL_KEYDOWN) {
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_BACKSPACE && strlen(input) > 0)
               input[strlen(input)-1] = '\0';
-            else if (ev.type == SDL_TEXTINPUT)
+            else if (ev.type == SDL_TEXTINPUT && strlen(input) < 11)
               strcat(input, ev.text.text);
             else if (ev.type == SDL_KEYDOWN && ev.key.keysym.scancode == SDL_SCANCODE_RETURN) {
-              strcpy(possible_highscore.name, input);
-              managePossibleNewHighscore(possible_highscore);
-              view = menu;
+              if (validInput(input)) {
+                strcpy(possible_highscore.name, input);
+                SDL_StopTextInput();
+                view = menu;
+                if (managePossibleNewHighscore(possible_highscore)) {
+                  view = highscores;
+                }
+              } else {
+                alert_input = true;
+              }
             }
           }
         }
-        // printf("%s\n", input);
         SDL_RenderClear(gRenderer);
         input_text_rect.w = strlen(input) * 15;
-        SDL_RenderCopy(gRenderer, menuBgTexture, NULL, NULL);
-        renderAskingInformation(gRenderer);
-        renderText(input, input_text_rect, gRenderer, minecraftFont, input_text_color);
+        SDL_RenderCopy(gRenderer, bgTexture, NULL, NULL);
+        renderAskingInformation(gRenderer, alert_input, minecraftFont);
+        if (strlen(input) > 0) {
+          renderText(input, input_text_rect, gRenderer, minecraftFont, input_text_color);
+        }
         SDL_RenderPresent(gRenderer);
         SDL_Delay(1000 / FPS);
     }
