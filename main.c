@@ -80,12 +80,6 @@ int main() {
   brickTextures[2] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[2]);
   brickTextures[3] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[3]);
 
-  // Ball setup
-  Ball *b = malloc(sizeof(Ball));
-  unsigned short ballsAmount = 1;
-  initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
-  SDL_Surface *ballSurface = IMG_Load("assets/sprites/ball.png");
-  SDL_Texture *ballTexture = SDL_CreateTextureFromSurface(gRenderer, ballSurface);
   //Mixer setup
   //Sounds and mixer setup
   Mix_Music *music = NULL;
@@ -93,7 +87,6 @@ int main() {
   Mix_Chunk *brickSound= NULL;
   Mix_Chunk *selectionSound = NULL;
 
-  
   music = Mix_LoadMUS("assets/sounds/music.mp3");
   bounce = Mix_LoadWAV("assets/sounds/bounce.mp3");
   brickSound = Mix_LoadWAV("assets/sounds/brick.mp3");
@@ -122,6 +115,13 @@ int main() {
     WINDOW_HEIGHT
   );
   if (!summon_paddle) return 1;
+
+  // Ball setup
+  Ball *b = malloc(sizeof(Ball));
+  unsigned short ballsAmount = 1;
+  initBall(b, paddle);
+  SDL_Surface *ballSurface = IMG_Load("assets/sprites/ball.png");
+  SDL_Texture *ballTexture = SDL_CreateTextureFromSurface(gRenderer, ballSurface);
 
   int up = 0, down = 0, left = 0, right = 0;
   bool closeWindow = 0;
@@ -160,8 +160,8 @@ int main() {
                     Mix_VolumeMusic(0)==0?Mix_VolumeMusic(MIX_MAX_VOLUME/12):Mix_VolumeMusic(0);
                   else{
                   view = hoveredOption;
-                  initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
                   centerPaddle(&paddle, WINDOW_WIDTH, WINDOW_HEIGHT);
+                  initBall(b, paddle);
                   bricks = createRandomBrickMatrix(rows, cols, &bricks_amount);
                   up = down = left = right = 0;
                   pause = true;
@@ -250,8 +250,8 @@ int main() {
           // Update Balls state and calculate collisions
           for (unsigned short i = 0; i < ballsAmount; ++i) {
             if (manageWallCollision(b+i, &view, WINDOW_WIDTH, WINDOW_HEIGHT,sounds.bounce)) {
-              initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
               centerPaddle(&paddle, WINDOW_WIDTH, WINDOW_HEIGHT);
+              initBall(b, paddle);
               up = down = left = right = 0;
               pause = true;
               frame = false;

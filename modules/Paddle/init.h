@@ -25,7 +25,7 @@ bool initPaddle(
   paddle -> texture = *texture;
   paddle -> surface = *surface;
 
-  SDL_QueryTexture(
+  SDL_QueryTexture( // This is to get the dimensions of the texture
     paddle -> texture,
     NULL, NULL, // format, access
     &paddle -> rect.w,
