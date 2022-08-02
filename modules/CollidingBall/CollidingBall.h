@@ -252,8 +252,7 @@ void managePaddleCollision (Ball *ball, Paddle pad) {
   ) {
     ball -> vel.y = fabs(ball -> vel.y) * -1;
     ball -> vel.x = fabs(ball -> vel.x) * -1;
-    return true;
-  }
+  } 
 
   // When the ball hits anywhere in the second third of the left side of the upper paddle
   else if (
@@ -261,7 +260,6 @@ void managePaddleCollision (Ball *ball, Paddle pad) {
     (pad.rect.x + pad.rect.w/3 - marginx  <=  ball -> pos.x  &&  ball -> pos.x  <=  pad.rect.x + pad.rect.w*2/3 + marginx)
   ) {
     ball -> vel.y = fabs(ball -> vel.y) * -1;
-    return true;
   }
   
   // When the ball hits anywhere in the third third of the left side of the upper paddle
@@ -272,8 +270,7 @@ void managePaddleCollision (Ball *ball, Paddle pad) {
     // Mutate the ball to orientate it to the right
     ball -> vel.y = fabs(ball -> vel.y) * -1;
     ball -> vel.x = fabs(ball -> vel.x);
-    return true;
-  } else return false;
+  }
 }
 
 void initBall (Ball *b, cus gameWidth, cus gameHeight) {
