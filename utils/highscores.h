@@ -7,7 +7,7 @@
 bool validInput (char *input) {
 	if (strlen(input) > 10 || !strlen(input))
 		return false;
-	for (unsigned short i=0;i<strlen(input);++i) {
+	for (unsigned short i=0;i<strlen(input); ++i) {
 		if (input[i] == ' ' || input[i] == '\t' || input[i] == '\n')
 			return false;
 	}
