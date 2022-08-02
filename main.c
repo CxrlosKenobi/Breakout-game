@@ -25,7 +25,7 @@
 const unsigned short WINDOW_WIDTH = 640;
 const unsigned short WINDOW_HEIGHT = 480;
 
-enum menu_option {menu, game, highscores, credits, quit};
+enum menu_option {menu, game, highscores, credits, quit, mute};
 
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
@@ -146,14 +146,19 @@ int main() {
             case SDL_KEYUP:
               switch (gameEvent.key.keysym.scancode) {
                 case SDL_SCANCODE_DOWN:
-                  if (hoveredOption == quit) hoveredOption = game;
+                  Mix_PlayChannel(-1, selectionSound, 0);
+                  if (hoveredOption == mute) hoveredOption = game;
                   else hoveredOption++;
                   break;
                 case SDL_SCANCODE_UP:
-                  if (hoveredOption == game) hoveredOption = quit;
+                  Mix_PlayChannel(-1, selectionSound, 0);
+                  if (hoveredOption == game) hoveredOption = mute;
                   else hoveredOption--;
                   break;
                 case SDL_SCANCODE_RETURN:
+                  if(hoveredOption==mute)
+                    Mix_VolumeMusic(0)==0?Mix_VolumeMusic(MIX_MAX_VOLUME/12):Mix_VolumeMusic(0);
+                  else{
                   view = hoveredOption;
                   initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
                   centerPaddle(&paddle, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -166,6 +171,7 @@ int main() {
                   lives = 3;
                   frame = true;
                   break;
+                  }
                 }
               break;
           }
@@ -330,6 +336,13 @@ int main() {
   SDL_DestroyTexture(menuBgTexture);
   SDL_FreeSurface(menuTitleSurface);
   SDL_DestroyTexture(menuTitleTexture);
+
+  //Free mixer
+  Mix_FreeMusic(music);
+  Mix_FreeChunk(bounce);
+  Mix_FreeChunk(selectionSound);
+  Mix_FreeChunk(brickSound);
+
 
   SDL_DestroyRenderer(gRenderer);
   SDL_DestroyWindow(gWindow);
