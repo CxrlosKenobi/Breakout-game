@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 //
 #include "modules/main.h"
 #include "modules/structs.h"
@@ -90,6 +91,29 @@ int main() {
   brickTextures[2] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[2]);
   brickTextures[3] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[3]);
 
+  //Sounds and mixer setup
+  Mix_Music *music = NULL;
+  Mix_Chunk *bounce = NULL;
+  Mix_Chunk *brickSound= NULL;
+  Mix_Chunk *selectionSound = NULL;
+
+  
+  music = Mix_LoadMUS("assets/sounds/music.mp3");
+  bounce = Mix_LoadWAV("assets/sounds/bounce.mp3");
+  brickSound = Mix_LoadWAV("assets/sounds/brick.mp3");
+  selectionSound = Mix_LoadWAV("assets/sounds/selectionMenu.mp3");
+  if (music == NULL)
+    printf("An error has occured while loading music\nSDL_Error: %s\n", SDL_GetError());
+  if (bounce == NULL)
+    printf("An error has occured while loading sound\nSDL_Error: %s\n", SDL_GetError());
+  if (brickSound == NULL)
+    printf("An error has occured while loading sound\nSDL_Error: %s\n", SDL_GetError());
+  Sound sounds;
+  sounds.bounce = brickSound;
+  Mix_PlayMusic(music, -1);
+  Mix_VolumeMusic(MIX_MAX_VOLUME/12);
+
+  Mix_VolumeChunk(bounce, MIX_MAX_VOLUME/12);
   // Ball setup
   Ball *b = malloc(sizeof(Ball));
   unsigned short ballsAmount = 1;
@@ -144,11 +168,13 @@ int main() {
             case SDL_KEYUP:
               switch (gameEvent.key.keysym.scancode) {
                 case SDL_SCANCODE_DOWN:
-                  if (hoveredOption == quit) hoveredOption = game;
+                  Mix_PlayChannel(-1, selectionSound, 0);
+                  if (hoveredOption == mute) hoveredOption = game;
                   else hoveredOption++;
                   break;
                 case SDL_SCANCODE_UP:
-                  if (hoveredOption == game) hoveredOption = quit;
+                  Mix_PlayChannel(-1, selectionSound, 0);
+                  if (hoveredOption == game) hoveredOption = mute;
                   else hoveredOption--;
                   break;
                 }
@@ -156,6 +182,9 @@ int main() {
             case SDL_KEYDOWN:
               switch (gameEvent.key.keysym.scancode) {
                 case SDL_SCANCODE_RETURN:
+                  if(hoveredOption==mute)
+                    Mix_VolumeMusic(0)==0?Mix_VolumeMusic(MIX_MAX_VOLUME/12):Mix_VolumeMusic(0);
+                   else{
                   view = hoveredOption;
                   initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
                   centerPaddle(&paddle, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -175,6 +204,7 @@ int main() {
                   //   SDL_StartTextInput();
                   // }
                   break;
+                  }
                 }
               break;
           }
@@ -187,7 +217,7 @@ int main() {
         SDL_Delay(1000 / FPS);
 
         break;
-      case game:
+      case game: ;
         SDL_Event gameEvent;
         while (SDL_PollEvent(&gameEvent)) {
           switch (gameEvent.type) {
@@ -251,27 +281,34 @@ int main() {
           movePaddle(&paddle, up, down, left, right, WINDOW_WIDTH, WINDOW_HEIGHT, SPEED);
 
           // Update Balls state and calculate collisions
-          for (unsigned short i = 0; i < ballsAmount; ++i) {
-            if (manageWallCollision(b+i, &view, WINDOW_WIDTH, WINDOW_HEIGHT)) {
+          for (unsigned short i=0;i<ballsAmount;++i) {
+            if (manageWallCollision(b+i, &view, WINDOW_WIDTH, WINDOW_HEIGHT, sounds.bounce)) {
+
               initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
               centerPaddle(&paddle, WINDOW_WIDTH, WINDOW_HEIGHT);
               up = down = left = right = 0;
               pause = true;
               frame = false;
               lives--;
+              Mix_PlayChannel(-1,brickSound, 0);
             }
 
-            managePaddleCollision(b+i, paddle);
+            if(managePaddleCollision(b+i, paddle))
+              Mix_PlayChannel(-1, bounce, 0);
             if (manageBricksCollision(bricks, b+i, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0, &score.val, &bricks_amount)) {
-              // printf("Bricks amount: %u\n", bricks_amount);
+              Mix_PlayChannel(-1, brickSound, 0);
             }
             (b+i)->pos.x += ((b+i)->vel.x) / 2;
             (b+i)->pos.y += ((b+i)->vel.y) / 2;
           }
+
           if (!bricks_amount) {
             win = true;
             view = win;
           }
+          if (!bricks_amount)
+            win = true;
+
           if (!lives) {
             lose = true;
           }
@@ -280,6 +317,12 @@ int main() {
             *input = '\0';
             alert_input = false;
             SDL_StartTextInput();
+
+            // view = menu;
+            // if (managePossibleNewHighScore(score.val)) {
+            //   // do Something
+            // }
+
           } else if (lose) {
             view = menu;
           }
@@ -388,6 +431,15 @@ int main() {
   SDL_DestroyTexture(menuBgTexture);
   SDL_FreeSurface(menuTitleSurface);
   SDL_DestroyTexture(menuTitleTexture);
+
+
+  // Free Mixer memory
+  Mix_FreeChunk(bounce);
+  Mix_FreeChunk(brickSound);
+  Mix_FreeChunk(selectionSound);
+  Mix_FreeMusic(music);
+  Mix_CloseAudio();
+  Mix_Quit();
 
   SDL_DestroyRenderer(gRenderer);
   SDL_DestroyWindow(gWindow);
