@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 //
 #include "modules/main.h"
 #include "modules/structs.h"
@@ -85,6 +86,30 @@ int main() {
   initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
   SDL_Surface *ballSurface = IMG_Load("assets/sprites/ball.png");
   SDL_Texture *ballTexture = SDL_CreateTextureFromSurface(gRenderer, ballSurface);
+  //Mixer setup
+  //Sounds and mixer setup
+  Mix_Music *music = NULL;
+  Mix_Chunk *bounce = NULL;
+  Mix_Chunk *brickSound= NULL;
+  Mix_Chunk *selectionSound = NULL;
+
+  
+  music = Mix_LoadMUS("assets/sounds/music.mp3");
+  bounce = Mix_LoadWAV("assets/sounds/bounce.mp3");
+  brickSound = Mix_LoadWAV("assets/sounds/brick.mp3");
+  selectionSound = Mix_LoadWAV("assets/sounds/selectionMenu.mp3");
+  if (music == NULL)
+    printf("An error has occured while loading music\nSDL_Error: %s\n", SDL_GetError());
+  if (bounce == NULL)
+    printf("An error has occured while loading sound\nSDL_Error: %s\n", SDL_GetError());
+  if (brickSound == NULL)
+    printf("An error has occured while loading sound\nSDL_Error: %s\n", SDL_GetError());
+  Sound sounds;
+  sounds.bounce = brickSound;
+  Mix_PlayMusic(music, -1);
+  Mix_VolumeMusic(MIX_MAX_VOLUME/12);
+
+  Mix_VolumeChunk(bounce, MIX_MAX_VOLUME/12);
 
   // Paddle setup
   Paddle paddle;
@@ -153,7 +178,7 @@ int main() {
         SDL_Delay(1000 / FPS);
 
         break;
-      case game:
+      case game: ;
         SDL_Event gameEvent;
         while (SDL_PollEvent(&gameEvent)) {
           switch (gameEvent.type) {
@@ -218,7 +243,7 @@ int main() {
 
           // Update Balls state and calculate collisions
           for (unsigned short i = 0; i < ballsAmount; ++i) {
-            if (manageWallCollision(b+i, &view, WINDOW_WIDTH, WINDOW_HEIGHT)) {
+            if (manageWallCollision(b+i, &view, WINDOW_WIDTH, WINDOW_HEIGHT,sounds.bounce)) {
               initBall(b, WINDOW_WIDTH, WINDOW_HEIGHT);
               centerPaddle(&paddle, WINDOW_WIDTH, WINDOW_HEIGHT);
               up = down = left = right = 0;

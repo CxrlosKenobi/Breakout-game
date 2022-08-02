@@ -60,11 +60,6 @@ typedef struct {
 	short power;
 } Brick;
 
-typedef struct {
-	Position pos;
-	Speed vel;
-	unsigned short radius;
-} Ball;
 
 typedef struct {
 	Mix_Chunk *bounce;

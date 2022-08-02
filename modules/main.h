@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-
+#include <SDL2/SDL_mixer.h>
 bool Initialize (
     char* wTitle, int WINDOW_WIDTH, int WINDOW_HEIGHT,
     SDL_Window **gWindow, SDL_Renderer **gRenderer
