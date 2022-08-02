@@ -11,7 +11,7 @@ void renderMenu (unsigned short option, SDL_Renderer* renderer, TTF_Font* font) 
 	rect.h = 33;
 	if (option == 1)
 		color.r = color.g = color.b = 100;
-	renderText("Start", rect, renderer, font, color);
+	renderText("START", rect, renderer, font, color);
 
  letter_width = 15;
 	rect.y += 50;
@@ -21,7 +21,7 @@ void renderMenu (unsigned short option, SDL_Renderer* renderer, TTF_Font* font) 
 	color.r = color.g = color.b = 0;
 	if (option == 2)
 		color.r = color.g = color.b = 100;
-	renderText("High scores", rect, renderer, font, color);
+	renderText("HIGH SCORES", rect, renderer, font, color);
 
 	rect.y += 50;
 	rect.w = 7 * letter_width;
@@ -29,7 +29,7 @@ void renderMenu (unsigned short option, SDL_Renderer* renderer, TTF_Font* font) 
 	color.r = color.g = color.b = 0;
 	if (option == 3)
 		color.r = color.g = color.b = 100;
-	renderText("Credits", rect, renderer, font, color);
+	renderText("CREDITS", rect, renderer, font, color);
 
 	letter_width = 13;
 	rect.h = 26;
@@ -39,5 +39,15 @@ void renderMenu (unsigned short option, SDL_Renderer* renderer, TTF_Font* font) 
 	color.r = color.g = color.b = 0;
 	if (option == 4)
 		color.r = color.g = color.b = 100;
-	renderText("Quit", rect, renderer, font, color);
+	renderText("QUIT", rect, renderer, font, color);
+
+	letter_width = 15;
+	;
+	rect.y += 0;
+	rect.w = 4 * letter_width;
+	rect.x = (640 - rect.w)-30 ;
+	color.r = color.g = color.b = 0;
+	if (option == 5)
+		color.r = color.g = color.b = 100;
+	renderText("MUTE", rect, renderer, font, color);
 }

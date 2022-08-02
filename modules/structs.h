@@ -1,3 +1,5 @@
+#include <SDL2/SDL_mixer.h>
+
 // Global
 
 typedef struct {
@@ -7,8 +9,13 @@ typedef struct {
 } GameState;
 
 typedef struct {
+	char name[11];
+	unsigned val;
+} Highscore;
+
+typedef struct {
   unsigned val;
-  char text[11];
+  char string[19];
   SDL_Rect rect;
   SDL_Color color;
 } Score;
@@ -57,4 +64,9 @@ typedef struct {
 	unsigned short health;
 	short power;
 } Brick;
+
+
+typedef struct {
+	Mix_Chunk *bounce;
+} Sound;
 

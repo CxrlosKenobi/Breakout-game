@@ -23,9 +23,16 @@ bool renderText (char* text, SDL_Rect msgRect, SDL_Renderer* renderer, TTF_Font*
 	bool val = false;
 	SDL_Surface* surfaceMessage = NULL;
 	surfaceMessage = TTF_RenderText_Solid(font, text, color);
-	SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
+	if (surfaceMessage == NULL)
+		printf("There was an error loading surface: %s\n", SDL_GetError());
+	SDL_Texture* Message = NULL;
+	Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
+	if (Message == NULL)
+		printf("There was an error loading texture: %s\n", SDL_GetError());
 	if (!SDL_RenderCopy(renderer, Message, NULL, &msgRect))
 		val = true;
+	else
+		printf("error on sdl_renderCopy(): %s\n", SDL_GetError());
 	SDL_FreeSurface(surfaceMessage);
 	SDL_DestroyTexture(Message);
 	return val;
