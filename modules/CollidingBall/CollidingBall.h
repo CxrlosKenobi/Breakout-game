@@ -264,7 +264,6 @@ void managePaddleCollision (Ball *ball, Paddle pad) {
   }
 }
 
-
 void initBall (Ball *b, cus gameWidth, cus gameHeight) {
   const short int vel = 7;
   short int maxv = 4;
