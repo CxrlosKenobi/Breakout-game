@@ -243,7 +243,7 @@ bool manageBricksCollision (Brick **bricks, Ball *b, cus WINDOW_WIDTH, cus WINDO
 
 bool managePaddleCollision (Ball *ball, Paddle pad) {
   const unsigned short marginx = 8;
-  const unsigned short marginy = 10;
+  const unsigned short marginy = 9;
 
   // When the ball hits anywhere in the first third of the left side of the upper paddle
   if (
