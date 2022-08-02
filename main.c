@@ -77,9 +77,9 @@ int main() {
   Brick **bricks;
   SDL_Surface *brickSurface[4];
   brickSurface[0] =  NULL;
-  brickSurface[1] =  IMG_Load("assets/sprites/bricks/503208-3.png");
-  brickSurface[2] =  IMG_Load("assets/sprites/bricks/503208-2.png");
-  brickSurface[3] =  IMG_Load("assets/sprites/bricks/503208.png");
+  brickSurface[1] =  IMG_Load("assets/sprites/bricks/3.png");
+  brickSurface[2] =  IMG_Load("assets/sprites/bricks/2.png");
+  brickSurface[3] =  IMG_Load("assets/sprites/bricks/1.png");
 
   SDL_Texture *brickTextures[4];
   brickTextures[1] = SDL_CreateTextureFromSurface(gRenderer, brickSurface[1]);
