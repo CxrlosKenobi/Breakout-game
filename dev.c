@@ -16,16 +16,26 @@
 #include "modules/CollidingBall/CollidingBall.h"
 #include "modules/Bricks/Bricks.h"
 #include "utils/utils.h"
+#include "utils/highscores.h"
 #include "views/menu.h"
 #include "views/credits.h"
-//
+#include "views/win.h"
+
+/* Global Settings */
 #define FPS (50)
 #define SPEED (600)
 
 const unsigned short WINDOW_WIDTH = 640;
 const unsigned short WINDOW_HEIGHT = 480;
 
-enum menu_option {menu, game, highscores, credits, quit, mute};
+enum menu_option {menu, game, highscores, credits, quit, win_view};
+
+typedef struct {
+  unsigned val;
+  char string[19];
+  SDL_Rect rect;
+  SDL_Color color;
+}Score;
 
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
@@ -60,8 +70,9 @@ int main() {
   score.rect.y = 420;
   score.rect.w = 110;
   score.rect.h = 30;
-  score.color.r = score.color.g = score.color.b = 0;
-  unsigned lives = 3; 
+
+  score.color.r = score.color.g = score.color.b = 255;
+  unsigned lives = 3;
 
   // Bricks setup
   const unsigned short rows = 6;
@@ -128,11 +139,23 @@ int main() {
   bool win = false;
   bool lose = true;
   bool frame = true;
+  Highscore possible_highscore;
   unsigned short view = menu;
   unsigned short hoveredOption = game;
   score.val = 0;
 
   SDL_Event gameEvent;
+  char input[11];
+  bool alert_input;
+  SDL_Rect input_text_rect;
+  input_text_rect.x = 140;
+  input_text_rect.y = 220;
+  // input_text_rect.w = 11 * 15;
+  input_text_rect.h = 30;
+  SDL_Color input_text_color;
+  input_text_color.r = 240;
+  input_text_color.g = 240;
+  input_text_color.b = 240;
   while (!closeWindow) {
     switch (view) {
       case menu:
@@ -154,6 +177,10 @@ int main() {
                   if (hoveredOption == game) hoveredOption = mute;
                   else hoveredOption--;
                   break;
+                }
+                break;
+            case SDL_KEYDOWN:
+              switch (gameEvent.key.keysym.scancode) {
                 case SDL_SCANCODE_RETURN:
                   if(hoveredOption==mute)
                     Mix_VolumeMusic(0)==0?Mix_VolumeMusic(MIX_MAX_VOLUME/12):Mix_VolumeMusic(0);
@@ -169,6 +196,13 @@ int main() {
                   lose = false;
                   lives = 3;
                   frame = true;
+                  // THIS IS JUST FOR TESTING PLEASE DELETE BEFORE ANY COMMIT, DON'T BE STUPID YO FCKIN IDIOT
+                  // if (view == game) {
+                  //   view = win_view;
+                  //   score.val = 255;
+                  //   *input = '\0';
+                  //   SDL_StartTextInput();
+                  // }
                   break;
                   }
                 }
@@ -267,16 +301,28 @@ int main() {
             (b+i)->pos.x += ((b+i)->vel.x) / 2;
             (b+i)->pos.y += ((b+i)->vel.y) / 2;
           }
+
+          if (!bricks_amount) {
+            win = true;
+            view = win;
+          }
           if (!bricks_amount)
             win = true;
+
           if (!lives) {
             lose = true;
           }
           if (win) {
-            view = menu;
+            view = win_view;
+            *input = '\0';
+            alert_input = false;
+            SDL_StartTextInput();
+
+            // view = menu;
             // if (managePossibleNewHighScore(score.val)) {
             //   // do Something
             // }
+
           } else if (lose) {
             view = menu;
           }
@@ -286,16 +332,15 @@ int main() {
 
           frame = !frame;
         }
-
+        
         if (frame) {
           SDL_RenderClear(gRenderer);
           SDL_RenderCopy(gRenderer, bgTexture, NULL, NULL);
           SDL_RenderCopy(gRenderer, paddle.texture, NULL, &paddle.rect);
           renderBricks(bricks, gRenderer, brickTextures, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
           renderBall(*b, gRenderer, ballTexture);
-          sprintf(score.text, "Score: %d", score.val);
-          // itoa(score.val, score.text, 10);
-          renderText(score.text, score.rect, gRenderer, minecraftFont, score.color); // render Score
+          sprintf(score.string, "score: %4d", score.val); // parses the score to string
+          renderText(score.string, score.rect, gRenderer, minecraftFont, score.color); // render Score
           renderLives(gRenderer, lives, heartTexture);
           // renderBallSquare(*b, gRenderer);
 
@@ -310,7 +355,14 @@ int main() {
             case SDL_QUIT:
               closeWindow = true;
               break;
+            case SDL_KEYDOWN:
+              switch (gameEvent.key.keysym.scancode) {
+              case SDL_SCANCODE_Q:
+                view = menu;
+                break;
+              }
           }
+          
         }
         break;
       case credits:
@@ -336,6 +388,40 @@ int main() {
       case quit:
         closeWindow = true;
         break;
+      case win_view:
+        possible_highscore.val = score.val;
+        SDL_Event ev;
+        while (SDL_PollEvent(&ev) != 0) {
+          if (ev.type == SDL_QUIT) {
+            closeWindow = true;
+          } else if (ev.type == SDL_TEXTINPUT || ev.type == SDL_KEYDOWN) {
+            if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_BACKSPACE && strlen(input) > 0)
+              input[strlen(input)-1] = '\0';
+            else if (ev.type == SDL_TEXTINPUT && strlen(input) < 11)
+              strcat(input, ev.text.text);
+            else if (ev.type == SDL_KEYDOWN && ev.key.keysym.scancode == SDL_SCANCODE_RETURN) {
+              if (validInput(input)) {
+                strcpy(possible_highscore.name, input);
+                SDL_StopTextInput();
+                view = menu;
+                if (managePossibleNewHighscore(possible_highscore)) {
+                  view = highscores;
+                }
+              } else {
+                alert_input = true;
+              }
+            }
+          }
+        }
+        SDL_RenderClear(gRenderer);
+        input_text_rect.w = strlen(input) * 15;
+        SDL_RenderCopy(gRenderer, bgTexture, NULL, NULL);
+        renderAskingInformation(gRenderer, alert_input, minecraftFont);
+        if (strlen(input) > 0) {
+          renderText(input, input_text_rect, gRenderer, minecraftFont, input_text_color);
+        }
+        SDL_RenderPresent(gRenderer);
+        SDL_Delay(1000 / FPS);
     }
   }
   freeBricks(bricks, rows);
