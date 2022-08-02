@@ -174,12 +174,12 @@ int main() {
                   lives = 3;
                   frame = true;
                   // THIS IS JUST FOR TESTING PLEASE DELETE BEFORE ANY COMMIT, DON'T BE STUPID YO FCKIN IDIOT
-                  if (view == game) {
-                    view = win_view;
-                    score.val = 255;
-                    *input = '\0';
-                    SDL_StartTextInput();
-                  }
+                  // if (view == game) {
+                  //   view = win_view;
+                  //   score.val = 255;
+                  //   *input = '\0';
+                  //   SDL_StartTextInput();
+                  // }
                   break;
                 }
               break;
