@@ -39,6 +39,10 @@ int main() {
   SDL_Texture *bgTexture = SDL_CreateTextureFromSurface(gRenderer, bgSurface);
   SDL_Surface *menuBgSurface = IMG_Load("assets/sprites/scenes/breakoutFondo.png");
   SDL_Texture *menuBgTexture = SDL_CreateTextureFromSurface(gRenderer, menuBgSurface);
+
+  SDL_Surface *creditsSurface = IMG_Load("assets/sprites/scenes/fondoMenosOscuro.png");
+  SDL_Texture *creditsTexture = SDL_CreateTextureFromSurface(gRenderer, creditsSurface);
+
   SDL_Surface *menuTitleSurface = IMG_Load("assets/Images/title.png");
   SDL_Surface *heartSurface = IMG_Load("assets/sprites/minecraft_heart.png");
   SDL_Texture *heartTexture = SDL_CreateTextureFromSurface(gRenderer, heartSurface);
@@ -51,7 +55,7 @@ int main() {
 
   SDL_Texture *menuTitleTexture = SDL_CreateTextureFromSurface(gRenderer, menuTitleSurface);
   TTF_Font* minecraftFont = NULL;
-  minecraftFont = TTF_OpenFont("assets/fonts/SF Atarian System Extended Bold Italic.ttf", 40);
+  minecraftFont = TTF_OpenFont("assets/fonts/DePixelHalbfett.ttf", 40);
   if (minecraftFont == NULL)
     printf("An error has occured while loading minecraft font\nSDL_Error: %s\n", SDL_GetError());
 
@@ -313,7 +317,7 @@ int main() {
           }
         }
         SDL_RenderClear(gRenderer);
-        SDL_RenderCopy(gRenderer, menuBgTexture, NULL, NULL);
+        SDL_RenderCopy(gRenderer, creditsTexture, NULL, NULL);
         renderCredits(gRenderer, minecraftFont);
         SDL_RenderPresent(gRenderer);
         SDL_Delay(1000 / FPS);
@@ -336,7 +340,10 @@ int main() {
   SDL_DestroyTexture(menuBgTexture);
   SDL_FreeSurface(menuTitleSurface);
   SDL_DestroyTexture(menuTitleTexture);
-
+  SDL_FreeSurface(heartSurface);
+  SDL_DestroyTexture(heartTexture);
+  SDL_FreeSurface(creditsSurface);
+  SDL_DestroyTexture(creditsTexture);
   //Free mixer
   Mix_FreeMusic(music);
   Mix_FreeChunk(bounce);
