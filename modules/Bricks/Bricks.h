@@ -1,3 +1,4 @@
+//
 void printBrickMatrix (Brick** m, unsigned short rows, unsigned short cols) {
   for (unsigned short i=0;i<rows;++i) {
     for (unsigned short j=0;j<rows;++j)
