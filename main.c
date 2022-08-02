@@ -215,7 +215,7 @@ int main() {
                   //   score.val = 255;
                   //   *input = '\0';
                   //   SDL_StartTextInput();
-                  // }
+                  }
                   break;
                   }
                 }
@@ -315,7 +315,6 @@ int main() {
           }
           if (!bricks_amount) {
             win = true;
-            view = win;
           }
           if (!bricks_amount)
             win = true;
@@ -328,15 +327,12 @@ int main() {
             *input = '\0';
             alert_input = false;
             SDL_StartTextInput();
-
           } else if (lose) {
             view = menu;
           }
-          if (!bricks_amount) win = true;
-          if (!lives) lose = true;
-          if (win || lose) view = menu;
 
-          frame = !frame;        }
+          frame = !frame;
+        }
 
         if (frame) {
           SDL_RenderClear(gRenderer);
@@ -345,7 +341,6 @@ int main() {
           renderBricks(bricks, gRenderer, brickTextures, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
           renderBall(*b, gRenderer, ballTexture);
           sprintf(score.string, "Score: %d", score.val);
-          // itoa(score.val, score.text, 10);
           renderText(score.string, score.rect, gRenderer, minecraftFont, score.color); // render Score
           renderLives(gRenderer, lives, heartTexture);
           // renderBallSquare(*b, gRenderer);
@@ -408,10 +403,11 @@ int main() {
               if (validInput(input)) {
                 strcpy(possible_highscore.name, input);
                 SDL_StopTextInput();
+                if (managePossibleNewHighscore(possible_highscore))
+                  printf("That's a new Highscore :D\n");
+                else 
+                  printf("That's not a new Highscore\n");
                 view = menu;
-                if (managePossibleNewHighscore(possible_highscore)) {
-                  view = highscores;
-                }
               } else {
                 alert_input = true;
               }
