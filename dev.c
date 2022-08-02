@@ -14,8 +14,10 @@
 #include "modules/CollidingBall/CollidingBall.h"
 #include "modules/Bricks/Bricks.h"
 #include "utils/utils.h"
+#include "utils/highscores.h"
 #include "views/menu.h"
 #include "views/credits.h"
+#include "views/win.h"
 
 /* Global Settings */
 #define FPS (50)
@@ -26,7 +28,7 @@
 const unsigned short WINDOW_WIDTH = 640;
 const unsigned short WINDOW_HEIGHT = 480;
 
-enum menu_option {menu, game, highscores, credits, quit};
+enum menu_option {menu, game, highscores, credits, quit, win_view};
 
 
 typedef struct {
@@ -116,10 +118,21 @@ int main() {
   bool win = false;
   bool lose = true;
   bool frame = true;
+  Highscore possible_highscore;
   unsigned short view = menu;
   unsigned short hoveredOption = game;
   score.val = 0;
   SDL_Event gameEvent;
+  char input[11];
+  SDL_Rect input_text_rect;
+  input_text_rect.x = 100;
+  input_text_rect.y = 220;
+  // input_text_rect.w = 11 * 15;
+  input_text_rect.h = 30;
+  SDL_Color input_text_color;
+  input_text_color.r = 0;
+  input_text_color.g = 0;
+  input_text_color.b = 0;
   while (!closeWindow) {
     switch (view) {
       case menu:
@@ -155,6 +168,11 @@ int main() {
                   lose = false;
                   lives = 3;
                   frame = true;
+                  // THIS IS JUST FOR TESTING PLEASE DELETE BEFORE ANY COMMIT, DON'T BE STUPID YO FCKIN IDIOT
+                  // if (view == game) {
+                  //   view = win_view;
+                  //   score.val = 255;
+                  // }
                   break;
                 }
               break;
@@ -280,16 +298,17 @@ int main() {
             (b+i)->pos.x += ((b+i)->vel.x) / 2;
             (b+i)->pos.y += ((b+i)->vel.y) / 2;
           }
-          if (!bricks_amount)
+          if (!bricks_amount) {
             win = true;
+            view = win;
+          }
           if (!lives) {
             lose = true;
           }
           if (win) {
-            view = menu;
-            if (managePossibleNewHighScore(score.val)) {
-              // do Something
-            }
+            view = win_view;
+            strcpy(input, "");
+            SDL_StartTextInput();
           } else if (lose) {
             view = menu;
           }
@@ -305,9 +324,10 @@ int main() {
           // SDL_RenderFillRect(gRenderer, &paddle.rect);
           renderBricks(bricks, gRenderer, brickTextures, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
           renderBall(*b, gRenderer, ballTexture);
-          sprintf(score.string, "score: %4d", score.val);
-          // itoa(score.val, score.string, 10);
+
+          sprintf(score.string, "score: %4d", score.val); // parses the score to string
           renderText(score.string, score.rect, gRenderer, minecraftFont, score.color); // render Score
+
           renderLives(gRenderer, lives, heartTexture);
           // renderBallSquare(*b, gRenderer);
 
@@ -322,7 +342,14 @@ int main() {
             case SDL_QUIT:
               closeWindow = true;
               break;
+            case SDL_KEYDOWN:
+              switch (gameEvent.key.keysym.scancode) {
+              case SDL_SCANCODE_Q:
+                view = menu;
+                break;
+              }
           }
+          
         }
         break;
       case credits:
@@ -348,6 +375,32 @@ int main() {
       case quit:
         closeWindow = true;
         break;
+      case win_view:
+        possible_highscore.val = score.val;
+        SDL_Event ev;
+        while (SDL_PollEvent(&ev) != 0) {
+          if (ev.type == SDL_QUIT) {
+            closeWindow = true;
+          } else if (ev.type == SDL_TEXTINPUT || ev.type == SDL_KEYDOWN) {
+            if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_BACKSPACE && strlen(input) > 0)
+              input[strlen(input)-1] = '\0';
+            else if (ev.type == SDL_TEXTINPUT)
+              strcat(input, ev.text.text);
+            else if (ev.type == SDL_KEYDOWN && ev.key.keysym.scancode == SDL_SCANCODE_RETURN) {
+              strcpy(possible_highscore.name, input);
+              managePossibleNewHighscore(possible_highscore);
+              view = menu;
+            }
+          }
+        }
+        // printf("%s\n", input);
+        SDL_RenderClear(gRenderer);
+        input_text_rect.w = strlen(input) * 15;
+        SDL_RenderCopy(gRenderer, menuBgTexture, NULL, NULL);
+        renderAskingInformation(gRenderer);
+        renderText(input, input_text_rect, gRenderer, minecraftFont, input_text_color);
+        SDL_RenderPresent(gRenderer);
+        SDL_Delay(1000 / FPS);
     }
   }
   freeBricks(bricks, rows);
