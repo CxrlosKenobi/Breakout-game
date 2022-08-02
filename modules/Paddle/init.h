@@ -1,13 +1,14 @@
 //* Paddle *//
-
 bool initPaddle(
   Paddle *paddle,
   SDL_Renderer **gRenderer,
   SDL_Surface **surface,
-  SDL_Texture **texture
+  SDL_Texture **texture,
+  int WINDOW_WIDTH,
+  int WINDOW_HEIGHT
 ) {
 
-  paddle -> sprite_path = "assets/sprites/paddle.png";
+  paddle -> sprite_path = "assets/sprites/paddle2.png";
   *surface = IMG_Load(paddle -> sprite_path);
 	if (!*surface) {
     printf("Error[-1]: %s\n", IMG_GetError());
@@ -21,8 +22,8 @@ bool initPaddle(
     return false;
   }
 
-  paddle -> surface = *surface;
   paddle -> texture = *texture;
+  paddle -> surface = *surface;
 
   SDL_QueryTexture(
     paddle -> texture,
@@ -31,8 +32,15 @@ bool initPaddle(
     &paddle -> rect.h
   );
 
-  // paddle -> rect.w /= 3; // Downscaling
-  // paddle -> rect.h /= 3; // Downscaling
+
+  // Placing the paddle
+  paddle -> xPos = (WINDOW_WIDTH / 2) - (paddle -> rect.w / 2);
+  paddle -> yPos = 400;
+  paddle -> rect.x = (int)paddle -> xPos;
+  paddle -> rect.y = (int)paddle -> yPos;
+
+  paddle -> rect.w /= 2;
+  paddle -> rect.h /= 2;
 
   return true;
 }

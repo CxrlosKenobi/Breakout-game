@@ -4,7 +4,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 
-typedef const unsigned short cus;
+typedef const unsigned short cus; // CUS: const unsigned short
 
 // Returns true in lost
 bool manageWallCollision (Ball *b, unsigned short *view, unsigned short gameWidth, unsigned short gameHeight, Mix_Chunk *bounce) {
@@ -241,14 +241,39 @@ bool manageBricksCollision (Brick **bricks, Ball *b, cus WINDOW_WIDTH, cus WINDO
   return false;
 }
 
-bool managePaddleCollision (Ball *b, Paddle p) {
+void managePaddleCollision (Ball *ball, Paddle pad) {
   const unsigned short marginx = 6;
   const unsigned short marginy = 8;
-  if ((p.rect.y-p.rect.h <= b->pos.y - marginy && b->pos.y <= p.rect.y) && (p.rect.x-marginx <= b->pos.x && b->pos.x <= p.rect.x+p.rect.w+marginx)){
-    b->vel.y = fabs(b->vel.y) * -1;
+
+  // When the ball hits anywhere in the first third of the left side of the upper paddle
+  if (
+    ((pad.rect.y - pad.rect.h)  <=  (ball -> pos.y - marginy)  &&  ball -> pos.y <= pad.rect.y)  &&
+    (pad.rect.x - marginx  <=  ball -> pos.x  &&  ball -> pos.x  <=  pad.rect.x + pad.rect.w/3 + marginx)
+  ) {
+    ball -> vel.y = fabs(ball -> vel.y) * -1;
+    ball -> vel.x = fabs(ball -> vel.x) * -1;
     return true;
-    }
-  return false;
+  }
+
+  // When the ball hits anywhere in the second third of the left side of the upper paddle
+  else if (
+    ((pad.rect.y - pad.rect.h)  <=  (ball -> pos.y - marginy)  &&  ball -> pos.y <= pad.rect.y)  &&
+    (pad.rect.x + pad.rect.w/3 - marginx  <=  ball -> pos.x  &&  ball -> pos.x  <=  pad.rect.x + pad.rect.w*2/3 + marginx)
+  ) {
+    ball -> vel.y = fabs(ball -> vel.y) * -1;
+    return true;
+  }
+  
+  // When the ball hits anywhere in the third third of the left side of the upper paddle
+  else if (
+    ((pad.rect.y - pad.rect.h)  <=  (ball -> pos.y - marginy)  &&  ball -> pos.y <= pad.rect.y)  &&
+    (pad.rect.x + pad.rect.w*2/3 - marginx  <=  ball -> pos.x  &&  ball -> pos.x  <=  pad.rect.x + pad.rect.w + marginx)
+  ) {
+    // Mutate the ball to orientate it to the right
+    ball -> vel.y = fabs(ball -> vel.y) * -1;
+    ball -> vel.x = fabs(ball -> vel.x);
+    return true;
+  } else return false;
 }
 
 void initBall (Ball *b, cus gameWidth, cus gameHeight) {
@@ -259,7 +284,6 @@ void initBall (Ball *b, cus gameWidth, cus gameHeight) {
   b->pos.x = gameWidth / 2;
   b->pos.y = 4 * gameHeight / 5;
   (b->vel.x) = rand()%(maxv-minv);
-  // printf("velocity of ball initialized in %lf\n", (b->vel.x));
   b->vel.x += minv;
   if (!(b->vel.x))
     (b->vel.x)--;
@@ -268,7 +292,6 @@ void initBall (Ball *b, cus gameWidth, cus gameHeight) {
   // b->vel.y = round(b->vel.y);
   b->vel.y *= -1;
 }
-
 
 void renderBall (Ball b, SDL_Renderer *renderer, SDL_Texture *texture) {
   SDL_Rect *rect = malloc(sizeof(SDL_Rect));
