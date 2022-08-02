@@ -14,7 +14,7 @@ bool validInput (char *input) {
 	return true;
 }
 
-Highscore* getHighscores (unsigned short *amount, Highscore candidate) {
+Highscore* getHighscores (unsigned short *amount) {
 	FILE *file = NULL;
 	file = fopen("utils/highscores.txt", "r");
 	if (file == NULL) {
@@ -105,7 +105,7 @@ bool managePossibleNewHighscore (Highscore candidate) {
 	const unsigned short maxHighScores = 3;
 	unsigned short amount;
 
-	Highscore *hs = getHighscores(&amount, candidate);
+	Highscore *hs = getHighscores(&amount);
 
 	if (hs == NULL)
 		return false;

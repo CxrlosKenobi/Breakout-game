@@ -19,6 +19,7 @@
 #include "views/menu.h"
 #include "views/credits.h"
 #include "utils/highscores.h"
+#include "views/highscores.h"
 #include "views/win.h"
 //
 #define FPS (50)
@@ -372,6 +373,11 @@ int main() {
               }
           }
         }
+        SDL_RenderClear(gRenderer);
+        SDL_RenderCopy(gRenderer, bgTexture, NULL, NULL);
+        renderHighscores(gRenderer, minecraftFont);
+        SDL_RenderPresent(gRenderer);
+        SDL_Delay(1000 / FPS);
         break;
       case credits:
         while (SDL_PollEvent(&gameEvent)) {
