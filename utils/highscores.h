@@ -14,7 +14,7 @@ bool validInput (char *input) {
 	return true;
 }
 
-Highscore* getHighscores (unsigned short *amount, Highscore candidate) {
+Highscore* getHighscores (unsigned short *amount) {
 	FILE *file = NULL;
 	file = fopen("utils/highscores.txt", "r");
 	if (file == NULL) {
@@ -25,8 +25,8 @@ Highscore* getHighscores (unsigned short *amount, Highscore candidate) {
 	unsigned score;
 	fscanf(file, "%[^\n]", name);
 	*amount = strtoul(name, NULL, 10);
-	Highscore *arr = malloc(sizeof(Highscore) * *amount);
-	for (unsigned short i=0;i<*amount;++i) {
+	Highscore *arr = malloc(sizeof(Highscore) * (*amount));
+	for (unsigned short i=0;i<(*amount);++i) {
 		fscanf(file, "%s %u ", name, &score);
 		// printf("%s: %u\n", name, score);
 		strcpy((arr+i)->name, name);
@@ -43,8 +43,10 @@ void killHighscores (Highscore *hs) {
 char* getHighscoreFile () {
 	FILE *file = NULL;
 	file = fopen("utils/highscores.txt", "r");
-	if (file == NULL)
+	if (file == NULL) {
+		printf("Seems to be an error while loading the highscore.txt file\n");
 		return NULL;
+	}
 	char *string_file = malloc(sizeof(char) * 5 * 101); // 5 lines of 100 chars
 	*string_file = '\0';
 	char *line = malloc(sizeof(char) * 101);
@@ -61,8 +63,10 @@ char* getHighscoreFile () {
 bool writeNewHighscore (char* string_file, unsigned short pos, Highscore hs, bool delete_last, unsigned short amount) {
 	FILE *file = NULL;
 	file = fopen("utils/highscores.txt", "w");
-	if (file = NULL)
+	if (file == NULL) {
+		printf("The file highscores.txt couldn't be opened :|\n");
 		return false;
+	}
 	unsigned short line = 0;
 	unsigned short i = 0;
 	if (!delete_last) // increments number of highscores, since one will be added and no one deleted
@@ -92,6 +96,7 @@ bool writeNewHighscore (char* string_file, unsigned short pos, Highscore hs, boo
 	}
 	fclose(file);
 	free(string_file);
+	// printf("The error is not on writing new Highscore");
 	return true;
 }
 
@@ -99,12 +104,14 @@ bool writeNewHighscore (char* string_file, unsigned short pos, Highscore hs, boo
 bool managePossibleNewHighscore (Highscore candidate) {
 	const unsigned short maxHighScores = 3;
 	unsigned short amount;
-	Highscore *hs = getHighscores(&amount, candidate);
+
+	Highscore *hs = getHighscores(&amount);
 
 	if (hs == NULL)
 		return false;
 
 	for (unsigned short i=0;i<amount;++i) {
+		printf("lol\n");
 		if (candidate.val > (hs+i)->val) {
 			getHighscoreFile();
 			writeNewHighscore(getHighscoreFile(), i, candidate, (maxHighScores == amount), amount);
@@ -117,7 +124,6 @@ bool managePossibleNewHighscore (Highscore candidate) {
 		return true;
 	}
 
-	printf("That's not a highscore\n");
 	killHighscores(hs);
   return false;
 }

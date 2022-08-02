@@ -19,6 +19,7 @@
 #include "views/menu.h"
 #include "views/credits.h"
 #include "utils/highscores.h"
+#include "views/highscores.h"
 #include "views/win.h"
 //
 #define FPS (50)
@@ -134,7 +135,7 @@ int main() {
   bool pause = true;
   bool win = false;
   bool lose = true;
-  bool frame = true;
+  unsigned frame = 0;
   Highscore possible_highscore;
   unsigned short view = menu;
   unsigned short hoveredOption = game;
@@ -173,54 +174,55 @@ int main() {
                   if (hoveredOption == game) hoveredOption = mute;
                   else hoveredOption--;
                   break;
-                case SDL_SCANCODE_RETURN:
-                  if(hoveredOption==mute)
-                    Mix_VolumeMusic(0)==0?Mix_VolumeMusic(MIX_MAX_VOLUME/12):Mix_VolumeMusic(0);
-                  else{
-                  view = hoveredOption;
-                  centerPaddle(&paddle, WINDOW_WIDTH, WINDOW_HEIGHT);
-                  initBall(b, paddle);
-                  bricks = createRandomBrickMatrix(rows, cols, &bricks_amount);
-                  up = down = left = right = 0;
-                  pause = true;
-                  score.val = 0;
-                  win = false;
-                  lose = false;
-                  lives = 3;
-                  frame = true;
-                  break;
-                  }
+                // case SDL_SCANCODE_RETURN:
+                //   if (hoveredOption==mute)
+                //     Mix_VolumeMusic(0)==0 ? Mix_VolumeMusic(MIX_MAX_VOLUME/12) : Mix_VolumeMusic(0);
+                //   else {
+                //     view = hoveredOption;
+                //     if (view = game) {
+                //       centerPaddle(&paddle, WINDOW_WIDTH, WINDOW_HEIGHT);
+                //       initBall(b, paddle);
+                //       bricks = createRandomBrickMatrix(rows, cols, &bricks_amount);
+                //       up = down = left = right = 0;
+                //       pause = true;
+                //       score.val = 0;
+                //       win = false;
+                //       lose = false;
+                //       lives = 3;
+                //       frame = true;
+                //     }
+                //   }
+                  // break;
                 }
               break;
             case SDL_KEYDOWN:
               switch (gameEvent.key.keysym.scancode) {
                 case SDL_SCANCODE_RETURN:
-                  if(hoveredOption == mute)
+                  if (hoveredOption == mute)
                     Mix_VolumeMusic(0)==0?Mix_VolumeMusic(MIX_MAX_VOLUME/12):Mix_VolumeMusic(0);
-                   else{
-                  view = hoveredOption;
-                  centerPaddle(&paddle, WINDOW_WIDTH, WINDOW_HEIGHT);
-                  initBall(b, paddle);
-                  bricks = createRandomBrickMatrix(rows, cols, &bricks_amount);
-                  up = down = left = right = 0;
-                  pause = true;
-                  score.val = 0;
-                  win = false;
-                  lose = false;
-                  lives = 3;
-                  frame = true;
-                  // THIS IS JUST FOR TESTING PLEASE DELETE BEFORE ANY COMMIT, DON'T BE STUPID YO FCKIN IDIOT
-                  // if (view == game) {
-                  //   view = win_view;
-                  //   score.val = 255;
-                  //   *input = '\0';
-                  //   SDL_StartTextInput();
-                  // }
+                  else {
+                    view = hoveredOption;
+                    centerPaddle(&paddle, WINDOW_WIDTH, WINDOW_HEIGHT);
+                    initBall(b, paddle);
+                    bricks = createRandomBrickMatrix(rows, cols, &bricks_amount);
+                    up = down = left = right = 0;
+                    pause = true;
+                    score.val = 0;
+                    win = false;
+                    lose = false;
+                    lives = 3;
+                    frame = 1;
+                    // THIS IS JUST FOR TESTING PLEASE DELETE OR COMMENT BEFORE ANY COMMIT, DON'T BE STUPID YOU FCKIN IDIOT
+                    // if (view == game) {
+                    //   view = win_view;
+                    //   score.val = 255;
+                    //   *input = '\0';
+                    //   SDL_StartTextInput();
+                  }
                   break;
                   }
                 }
               break;
-          }
         }
         SDL_RenderClear(gRenderer);
         SDL_RenderCopy(gRenderer, menuBgTexture, NULL, NULL);
@@ -230,7 +232,7 @@ int main() {
         SDL_Delay(1000 / FPS);
 
         break;
-      case game: ;
+      case game:
         SDL_Event gameEvent;
         while (SDL_PollEvent(&gameEvent)) {
           switch (gameEvent.type) {
@@ -257,6 +259,9 @@ int main() {
                 case SDL_SCANCODE_RIGHT:
                 case SDL_SCANCODE_D:
                   right = 1;
+                  break;
+                case SDL_SCANCODE_Q:
+                  view = menu;
                   break;
                 default:
                   break;
@@ -315,7 +320,6 @@ int main() {
           }
           if (!bricks_amount) {
             win = true;
-            view = win;
           }
           if (!bricks_amount)
             win = true;
@@ -328,28 +332,28 @@ int main() {
             *input = '\0';
             alert_input = false;
             SDL_StartTextInput();
-
           } else if (lose) {
             view = menu;
           }
-          if (!bricks_amount) win = true;
-          if (!lives) lose = true;
-          if (win || lose) view = menu;
 
-          frame = !frame;        }
+        }
+        frame++;
 
-        if (frame) {
+        if (frame%2) {
           SDL_RenderClear(gRenderer);
           SDL_RenderCopy(gRenderer, bgTexture, NULL, NULL);
           SDL_RenderCopy(gRenderer, paddle.texture, NULL, &paddle.rect);
           renderBricks(bricks, gRenderer, brickTextures, WINDOW_WIDTH, 2*WINDOW_HEIGHT/5, rows, cols, 0, 0);
           renderBall(*b, gRenderer, ballTexture);
-          sprintf(score.string, "Score: %d", score.val);
-          // itoa(score.val, score.text, 10);
+          sprintf(score.string, "Score: %4d", score.val);
           renderText(score.string, score.rect, gRenderer, minecraftFont, score.color); // render Score
           renderLives(gRenderer, lives, heartTexture);
+          if (pause && ((frame%180) < 90)) {
+            SDL_Rect rect = {230, 240, 11 * 17, 30};
+            SDL_Color color = {0, 0, 0};
+            renderText("Press SPACE", rect, gRenderer, minecraftFont, color);
+          }
           // renderBallSquare(*b, gRenderer);
-
           SDL_RenderPresent(gRenderer);
         }
 
@@ -369,6 +373,11 @@ int main() {
               }
           }
         }
+        SDL_RenderClear(gRenderer);
+        SDL_RenderCopy(gRenderer, bgTexture, NULL, NULL);
+        renderHighscores(gRenderer, minecraftFont);
+        SDL_RenderPresent(gRenderer);
+        SDL_Delay(1000 / FPS);
         break;
       case credits:
         while (SDL_PollEvent(&gameEvent)) {
@@ -408,10 +417,11 @@ int main() {
               if (validInput(input)) {
                 strcpy(possible_highscore.name, input);
                 SDL_StopTextInput();
+                if (managePossibleNewHighscore(possible_highscore))
+                  printf("That's a new Highscore :D\n");
+                else 
+                  printf("That's not a new Highscore\n");
                 view = menu;
-                if (managePossibleNewHighscore(possible_highscore)) {
-                  view = highscores;
-                }
               } else {
                 alert_input = true;
               }

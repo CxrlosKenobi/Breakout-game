@@ -12,7 +12,6 @@ bool renderAskingInformation (SDL_Renderer *renderer, bool print_alert, TTF_Font
   rect.h = 200;
   SDL_SetRenderDrawColor(renderer, 173, 216, 230, 255);
   SDL_RenderFillRect(renderer, &rect);
-  SDL_RenderFillRect(renderer, &rect);
 
   // "Write your nickname" message
   char text[150];
