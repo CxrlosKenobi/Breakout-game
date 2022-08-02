@@ -9,8 +9,13 @@ typedef struct {
 } GameState;
 
 typedef struct {
+	char name[11];
+	unsigned val;
+} Highscore;
+
+typedef struct {
   unsigned val;
-  char text[11];
+  char string[19];
   SDL_Rect rect;
   SDL_Color color;
 } Score;

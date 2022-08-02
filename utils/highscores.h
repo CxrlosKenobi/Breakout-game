@@ -3,10 +3,6 @@
 #include <stdbool.h>
 #include <string.h>
 
-typedef struct {
-	char name[11];
-	unsigned val;
-} Highscore;
 
 bool validInput (char *input) {
 	if (strlen(input) > 10 || !strlen(input))

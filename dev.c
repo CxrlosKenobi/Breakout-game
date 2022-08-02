@@ -30,13 +30,6 @@ const unsigned short WINDOW_HEIGHT = 480;
 
 enum menu_option {menu, game, highscores, credits, quit, win_view};
 
-typedef struct {
-  unsigned val;
-  char string[19];
-  SDL_Rect rect;
-  SDL_Color color;
-}Score;
-
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
 
