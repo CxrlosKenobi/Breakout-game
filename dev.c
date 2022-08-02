@@ -274,9 +274,9 @@ int main() {
           }
           if (win) {
             view = menu;
-            if (managePossibleNewHighScore(score.val)) {
-              // do Something
-            }
+            // if (managePossibleNewHighScore(score.val)) {
+            //   // do Something
+            // }
           } else if (lose) {
             view = menu;
           }
